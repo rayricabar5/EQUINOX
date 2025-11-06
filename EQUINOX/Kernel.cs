@@ -1,6 +1,10 @@
-﻿using System;
+﻿using Cosmos.System.Graphics;
+using Cosmos.System.Graphics.Fonts;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using Sys = Cosmos.System;
@@ -10,8 +14,14 @@ namespace EQUINOX
     public class Kernel : Sys.Kernel
     {
 
+        //protected override void Start()
+        //{
+        //    CanvasCreate();
+        //}
+
         protected override void BeforeRun()
         {
+
             Console.WriteLine();
             Console.WriteLine("Equinox Booted.");
             Console.WriteLine();
@@ -63,6 +73,9 @@ namespace EQUINOX
                     case "shutdown":
                         Cosmos.System.Power.Shutdown();
                         break;
+                    case "canvas":
+                        CanvasCreate();
+                        break;
                     default:
                         Console.WriteLine("Invalid command");
                         break;
@@ -73,10 +86,10 @@ namespace EQUINOX
             string command = sections[0];
             string[] args;
 
-            if (sections.Length > 1) 
-            { 
+            if (sections.Length > 1)
+            {
                 args = new string[sections.Length - 1];
-                for (int i = 1; i<sections.Length; i++)
+                for (int i = 1; i < sections.Length; i++)
                 {
                     args[i - 1] = sections[i];
                 }
@@ -86,7 +99,7 @@ namespace EQUINOX
                 args = new string[0];
             }
 
-                main(command, args);
+            main(command, args);
         }
 
         string echo(string[] words)
@@ -122,8 +135,8 @@ namespace EQUINOX
             for (int i = 0; i < args.Length - 1; i++)
             {
                 try
-                { 
-                    numbers[i] = float.Parse(args[i+1]); 
+                {
+                    numbers[i] = float.Parse(args[i + 1]);
                 }
                 catch (Exception err)
                 {
@@ -136,8 +149,8 @@ namespace EQUINOX
 
             answer = numbers[0];
 
-            if (numbers.Length == 1) 
-            { 
+            if (numbers.Length == 1)
+            {
                 if (operation != "-a" && operation != "-s" && operation != "-m" && operation != "-d")
                 {
                     Console.WriteLine($"Operation {operation} is not recognized.");
@@ -174,6 +187,69 @@ namespace EQUINOX
 
             Console.WriteLine(answer);
             return answer;
+        }
+
+        void CanvasCreate()
+        {
+            Canvas canvas;
+            Pen yellow = new Pen(Color.Yellow);
+            var font = PCScreenFont.Default;
+
+            canvas = FullScreenCanvas.GetFullScreenCanvas(new Mode(1024, 768, ColorDepth.ColorDepth32));
+
+            canvas.Clear(Color.DarkSlateGray);
+
+            // E
+            canvas.DrawFilledRectangle(yellow, 50, 50, 100, 30);
+            canvas.DrawFilledRectangle(yellow, 50, 135, 100, 30);
+            canvas.DrawFilledRectangle(yellow, 50, 220, 100, 30);
+            canvas.DrawFilledRectangle(yellow, 50, 50, 30, 200);
+
+            // Q
+            canvas.DrawFilledRectangle(yellow, 170, 50, 95, 30);
+            canvas.DrawFilledRectangle(yellow, 170, 50, 30, 200);
+            canvas.DrawFilledRectangle(yellow, 265, 50, 30, 200);
+            canvas.DrawFilledRectangle(yellow, 170, 220, 95, 30);
+            canvas.DrawFilledRectangle(yellow, 230, 200, 20, 70);
+
+            // U
+            canvas.DrawFilledRectangle(yellow, 325, 50, 30, 200);
+            canvas.DrawFilledRectangle(yellow, 420, 50, 30, 200);
+            canvas.DrawFilledRectangle(yellow, 325, 220, 95, 30);
+
+            // I
+            canvas.DrawFilledRectangle(yellow, 475, 50, 30, 200);
+
+            // N
+            canvas.DrawFilledRectangle(yellow, 530, 50, 30, 200);
+            canvas.DrawFilledRectangle(yellow, 620, 50, 30, 200);
+            canvas.DrawFilledRectangle(yellow, 560, 80, 20, 42);
+            canvas.DrawFilledRectangle(yellow, 575, 120, 22, 47);
+            canvas.DrawFilledRectangle(yellow, 595, 160, 22, 47);
+            canvas.DrawFilledRectangle(yellow, 615, 200, 28, 50);
+
+            // O
+            canvas.DrawFilledRectangle(yellow, 670, 50, 100, 30);
+            canvas.DrawFilledRectangle(yellow, 670, 50, 30, 200);
+            canvas.DrawFilledRectangle(yellow, 770, 50, 30, 200);
+            canvas.DrawFilledRectangle(yellow, 670, 220, 100, 30);
+
+            //X
+            canvas.DrawFilledRectangle(yellow, 830, 50, 25, 46);
+            canvas.DrawFilledRectangle(yellow, 850, 90, 25, 46);
+            canvas.DrawFilledRectangle(yellow, 870, 130, 25, 46);
+            canvas.DrawFilledRectangle(yellow, 890, 170, 25, 46);
+            canvas.DrawFilledRectangle(yellow, 910, 200, 25, 50);
+
+            canvas.DrawFilledRectangle(yellow, 830, 200, 22, 50);
+            canvas.DrawFilledRectangle(yellow, 850, 170, 22, 46);
+            canvas.DrawFilledRectangle(yellow, 890, 90, 22, 46);
+            canvas.DrawFilledRectangle(yellow, 910, 50, 22, 50);
+
+
+            canvas.Display();
+            Console.ReadKey();
+            canvas.Disable();
         }
     }
 }
