@@ -12,21 +12,44 @@ using System.Security.Cryptography;
 using System.Text;
 using Console = System.Console;
 using Sys = Cosmos.System;
+using EQUINOX.Display;
+using EQUINOX.Features;
 
 namespace EQUINOX
 {
     public class Kernel : Sys.Kernel
     {
+
+        public static class Notes
+        {
+            public static Dictionary<string, uint> frequencies = new Dictionary<string, uint>
+    {
+        {"C", 261},
+        {"D", 294},
+        {"E", 329},
+        {"F", 349},
+        {"G", 392},
+        {"A", 440},
+        {"B", 493},
+        {"C5", 523}
+    };
+        }
+
         // FS NEW: file system (manual persistence)
         private readonly FileSystem _fs = new FileSystem();
 
         // VFS NEW
         private CosmosVFS _vfs;
 
-        //protected override void Start()
-        //{
-        //    CanvasCreate();
-        //}
+        //GUI
+        public static GUI gui;
+        public LaunchGUI launcher;
+
+        //GeneralFunc
+        public GeneralFunc general;
+
+        //Math
+        public Calculator calculator;
 
         protected override void BeforeRun()
         {
@@ -38,6 +61,14 @@ namespace EQUINOX
             Console.WriteLine();
             Console.WriteLine("For the list of function, type \" help \"");
             Console.WriteLine();
+
+            PCSpeaker.Beep(Notes.frequencies["C"], 150); // Do
+            PCSpeaker.Beep(Notes.frequencies["D"], 150); // Do
+            PCSpeaker.Beep(Notes.frequencies["E"], 150); // Do
+            PCSpeaker.Beep(Notes.frequencies["F"], 150); // Do
+            PCSpeaker.Beep(Notes.frequencies["G"], 150); // Do
+            PCSpeaker.Beep(Notes.frequencies["A"], 150); // Do
+            PCSpeaker.Beep(Notes.frequencies["B"], 150); // Do
 
             // Check the Availabile Volume\s for File Persistence
             if (Directory.Exists(@"0:\"))
@@ -52,6 +83,12 @@ namespace EQUINOX
 
         protected override void Run()
         {
+            if (Kernel.gui != null) 
+            { 
+                Kernel.gui.HandleGUIinputs();
+                return;
+            }
+
             string choice;
 
             Console.WriteLine();
@@ -79,16 +116,16 @@ namespace EQUINOX
                 switch (command)
                 {
                     case "help":
-                        Help();
+                        general.Help();
                         break;
                     case "fs-help": // This shows the file management commands
-                        FsHelp();
+                        general.FsHelp();
                         break;
                     case "echo":
-                        Console.WriteLine(echo(args));
+                        Console.WriteLine(general.echo(args));
                         break;
                     case "calc":
-                        Calculate(args);
+                        calculator.Calculate(args);
                         break;
                     case "reboot":
                         Cosmos.System.Power.Reboot();
@@ -97,7 +134,7 @@ namespace EQUINOX
                         Cosmos.System.Power.Shutdown();
                         break;
                     case "canvas":
-                        CanvasCreate();
+                        launcher.CanvasCreate();
                         break;
 
                     // File Management Commands
@@ -227,6 +264,9 @@ namespace EQUINOX
                             Console.WriteLine("Stat failed: " + ex.Message);
                         }
                         break;
+                    case "launch-gui":
+                        Console.WriteLine(launcher.LaunchDisplay("GUI", args));
+                        break;
                     default:
                         Console.WriteLine("Invalid command");
                         break;
@@ -240,179 +280,6 @@ namespace EQUINOX
             for (int i = 1; i < sections.Length; i++) { args[i - 1] = sections[i]; }
             main(command, args);
         }
-
-        string echo(string[] words)
-        {
-            string output = string.Join(" ", words);
-            return output;
-        }
-
-        void Help()
-        {
-            Console.WriteLine();
-            Console.WriteLine("System Commands:");
-            Console.WriteLine("- help");
-            Console.WriteLine("- fs-help");
-            Console.WriteLine("- echo <text>");
-            Console.WriteLine("- calc");
-            Console.WriteLine("- reboot");
-            Console.WriteLine("- shutdown");
-            Console.WriteLine("- canvas");
-            Console.WriteLine();
-        }
-
-        // File System Console
-        void FsHelp()
-        {
-            Console.WriteLine("File / Directory management commands:");
-            Console.WriteLine("- pwd                 : Show current working directory.");
-            Console.WriteLine("- ls [path]           : List entries (current or specified path).");
-            Console.WriteLine("- mkdir <path>        : Create directory.");
-            Console.WriteLine("- touch <path>        : Create empty file or update timestamp.");
-            Console.WriteLine("- write <path> <text> : Overwrite file content.");
-            Console.WriteLine("- append <path> <text>: Append to file.");
-            Console.WriteLine("- cat <path>          : Display file contents.");
-            Console.WriteLine("- mv <path> <newname> : Rename (same directory).");
-            Console.WriteLine("- cp <src> <dest>     : Copy file or directory (dest may be existing dir or new path).");
-            Console.WriteLine("- rm <path>           : Delete file or empty directory.");
-            Console.WriteLine("- cd <path>           : Change directory (supports .. and absolute).");
-            Console.WriteLine("- find <term>         : Search names containing term.");
-            Console.WriteLine("- fs-save <vfsPath>   : Persist all (e.g. 0:\\equifs.dat).");
-            Console.WriteLine("- fs-load <vfsPath>   : Load persisted state.");
-            Console.WriteLine("- vfs-cat <diskPath>  : Show raw persistence file.");
-            Console.WriteLine();
-        }
-
-        float Calculate(string[] args)
-        {
-            if (args.Length < 2)
-            {
-                Console.WriteLine("Usage: calc <operation> <num1> <num2> ...");
-                Console.WriteLine("Operations: -a (add), -s (subtract), -m (multiply), -d (divide)");
-                return 0;
-            }
-
-            float[] numbers = new float[args.Length - 1];
-            string operation = args[0];
-            float answer;
-
-            for (int i = 0; i < args.Length - 1; i++)
-            {
-                try
-                {
-                    numbers[i] = float.Parse(args[i + 1]);
-                }
-                catch (Exception err)
-                {
-                    Console.WriteLine(err.Message);
-                    Console.WriteLine("One of the input is unable to be added");
-                    Console.WriteLine($"Invalid number: {args[i + 1]}");
-                    return 0;
-                }
-            }
-
-            answer = numbers[0];
-
-            if (numbers.Length == 1)
-            {
-                if (operation != "-a" && operation != "-s" && operation != "-m" && operation != "-d")
-                {
-                    Console.WriteLine($"Operation {operation} is not recognized.");
-                    return 0;
-                }
-            }
-
-            for (int i = 1; i < numbers.Length; i++)
-            {
-                switch (operation)
-                {
-                    case "-a":
-                        answer += numbers[i];
-                        break;
-                    case "-s":
-                        answer -= numbers[i];
-                        break;
-                    case "-m":
-                        answer *= numbers[i];
-                        break;
-                    case "-d":
-                        if (numbers[i] == 0)
-                        {
-                            Console.WriteLine("Error: Division by zero.");
-                            return 0;
-                        }
-                        answer /= numbers[i];
-                        break;
-                    default:
-                        Console.WriteLine($"Operation {operation} is not recognized.");
-                        return 0;
-                }
-            }
-
-            Console.WriteLine(answer);
-            return answer;
-        }
-
-        void CanvasCreate()
-        {
-            Canvas canvas;
-            Pen yellow = new Pen(Color.Yellow);
-            var font = PCScreenFont.Default;
-
-            canvas = FullScreenCanvas.GetFullScreenCanvas(new Mode(1024, 768, ColorDepth.ColorDepth32));
-            canvas.Clear(Color.DarkSlateGray);
-
-            // E
-            canvas.DrawFilledRectangle(yellow, 50, 50, 100, 30);
-            canvas.DrawFilledRectangle(yellow, 50, 135, 100, 30);
-            canvas.DrawFilledRectangle(yellow, 50, 220, 100, 30);
-            canvas.DrawFilledRectangle(yellow, 50, 50, 30, 200);
-
-            // Q
-            canvas.DrawFilledRectangle(yellow, 170, 50, 95, 30);
-            canvas.DrawFilledRectangle(yellow, 170, 50, 30, 200);
-            canvas.DrawFilledRectangle(yellow, 265, 50, 30, 200);
-            canvas.DrawFilledRectangle(yellow, 170, 220, 95, 30);
-            canvas.DrawFilledRectangle(yellow, 230, 200, 20, 70);
-
-            // U
-            canvas.DrawFilledRectangle(yellow, 325, 50, 30, 200);
-            canvas.DrawFilledRectangle(yellow, 420, 50, 30, 200);
-            canvas.DrawFilledRectangle(yellow, 325, 220, 95, 30);
-
-            // I
-            canvas.DrawFilledRectangle(yellow, 475, 50, 30, 200);
-
-            // N
-            canvas.DrawFilledRectangle(yellow, 530, 50, 30, 200);
-            canvas.DrawFilledRectangle(yellow, 620, 50, 30, 200);
-            canvas.DrawFilledRectangle(yellow, 560, 80, 20, 42);
-            canvas.DrawFilledRectangle(yellow, 575, 120, 22, 47);
-            canvas.DrawFilledRectangle(yellow, 595, 160, 22, 47);
-            canvas.DrawFilledRectangle(yellow, 615, 200, 28, 50);
-
-            // O
-            canvas.DrawFilledRectangle(yellow, 670, 50, 100, 30);
-            canvas.DrawFilledRectangle(yellow, 670, 50, 30, 200);
-            canvas.DrawFilledRectangle(yellow, 770, 50, 30, 200);
-            canvas.DrawFilledRectangle(yellow, 670, 220, 100, 30);
-
-            // X
-            canvas.DrawFilledRectangle(yellow, 830, 50, 25, 46);
-            canvas.DrawFilledRectangle(yellow, 850, 90, 25, 46);
-            canvas.DrawFilledRectangle(yellow, 870, 130, 25, 46);
-            canvas.DrawFilledRectangle(yellow, 890, 170, 25, 46);
-            canvas.DrawFilledRectangle(yellow, 910, 200, 25, 50);
-
-            canvas.DrawFilledRectangle(yellow, 830, 200, 22, 50);
-            canvas.DrawFilledRectangle(yellow, 850, 170, 22, 46);
-            canvas.DrawFilledRectangle(yellow, 890, 90, 22, 46);
-            canvas.DrawFilledRectangle(yellow, 910, 50, 22, 50);
-
-
-            canvas.Display();
-            Console.ReadKey();
-            canvas.Disable();
-        }
     }
 }
+
