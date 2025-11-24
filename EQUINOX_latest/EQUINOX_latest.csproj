@@ -18,7 +18,18 @@
         <Description>Use VMware Player or Workstation to deploy and debug.</Description>
         <PxeInterface>192.168.0.8</PxeInterface>
         <DebugEnabled>False</DebugEnabled>
+        <ExtractMapFile>False</ExtractMapFile>
+        <DebugMode>Source</DebugMode>
+        <TraceMode>All</TraceMode>
     </PropertyGroup>
+
+    <ItemGroup>
+      <None Remove="tagline.wav" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="tagline.wav" />
+    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Cosmos.Build" Version="0-*" NoWarn="NU1604" />

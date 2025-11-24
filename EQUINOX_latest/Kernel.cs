@@ -1,8 +1,16 @@
-﻿using Cosmos.System;
+﻿using Cosmos.HAL.Audio;
+using Cosmos.HAL.BlockDevice.Registers;
+using Cosmos.HAL.Drivers.PCI.Audio;
+using Cosmos.System;
+using Cosmos.System.Audio;
+using Cosmos.System.Audio.IO;
 using Cosmos.System.FileSystem;
 using Cosmos.System.FileSystem.VFS;
 using Cosmos.System.Graphics;
 using Cosmos.System.Graphics.Fonts;
+using EQUINOX.Display;
+using EQUINOX.Features;
+using IL2CPU.API.Attribs;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -12,28 +20,12 @@ using System.Security.Cryptography;
 using System.Text;
 using Console = System.Console;
 using Sys = Cosmos.System;
-using EQUINOX.Display;
-using EQUINOX.Features;
+
 
 namespace EQUINOX
 {
     public class Kernel : Sys.Kernel
     {
-
-        public static class Notes
-        {
-            public static Dictionary<string, uint> frequencies = new Dictionary<string, uint>
-    {
-        {"C", 261},
-        {"D", 294},
-        {"E", 329},
-        {"F", 349},
-        {"G", 392},
-        {"A", 440},
-        {"B", 493},
-        {"C5", 523}
-    };
-        }
 
         // FS NEW: file system (manual persistence)
         private readonly FileSystem _fs = new FileSystem();
@@ -43,6 +35,7 @@ namespace EQUINOX
 
         //GUI
         public static GUI gui;
+        public static Piano piano;
         public LaunchGUI launcher;
 
         //GeneralFunc
@@ -50,6 +43,8 @@ namespace EQUINOX
 
         //Math
         public Calculator calculator;
+
+        [ManifestResourceStream(ResourceName = "EQUINOX_latest.tagline.wav")] public static byte[] tagline;
 
         protected override void BeforeRun()
         {
@@ -62,13 +57,30 @@ namespace EQUINOX
             Console.WriteLine("For the list of function, type \" help \"");
             Console.WriteLine();
 
-            PCSpeaker.Beep(Notes.frequencies["C"], 150); // Do
-            PCSpeaker.Beep(Notes.frequencies["D"], 150); // Do
-            PCSpeaker.Beep(Notes.frequencies["E"], 150); // Do
-            PCSpeaker.Beep(Notes.frequencies["F"], 150); // Do
-            PCSpeaker.Beep(Notes.frequencies["G"], 150); // Do
-            PCSpeaker.Beep(Notes.frequencies["A"], 150); // Do
-            PCSpeaker.Beep(Notes.frequencies["B"], 150); // Do
+            try
+            {
+                var driver = AC97.Initialize(bufferSize: 4096);
+                if (driver == null)
+                {
+                    Console.WriteLine("AC97 not available, skipping voiceover.");
+                    return;
+                }
+
+                var mixer = new AudioMixer();
+                var audioStream = MemoryAudioStream.FromWave(tagline); // tagline = valid PCM16 WAV
+                mixer.Streams.Add(audioStream);
+
+                var audioManager = new AudioManager()
+                {
+                    Stream = mixer,
+                    Output = driver
+                };
+                audioManager.Enable();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Audio playback failed: " + e.Message);
+            }
 
             // Check the Availabile Volume\s for File Persistence
             if (Directory.Exists(@"0:\"))
@@ -83,9 +95,16 @@ namespace EQUINOX
 
         protected override void Run()
         {
+
             if (Kernel.gui != null) 
             { 
                 Kernel.gui.HandleGUIinputs();
+                return;
+            }
+
+            if (Kernel.piano != null)
+            {
+                Kernel.piano.HandleGUIinputs();
                 return;
             }
 
@@ -266,6 +285,9 @@ namespace EQUINOX
                         break;
                     case "launch-gui":
                         Console.WriteLine(launcher.LaunchDisplay("GUI", args));
+                        break;
+                    case "piano":
+                        Console.WriteLine(launcher.Piano("Piano", args));
                         break;
                     default:
                         Console.WriteLine("Invalid command");

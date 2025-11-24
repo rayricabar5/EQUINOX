@@ -20,17 +20,58 @@ namespace EQUINOX.Display
         private MouseState prevMouseState;
         private List<Tuple<Sys.Graphics.Point, Color>> savedPixels;
         private UInt32 px, py;
+
         private Cancel cancel;
+        private TabBar tabBar;
+        private Pref pref;
+        private ColorLib colorlib;
+        private Redraw redraw;
+        private OS_Details os_details;
+
+        private static Color bg;
+       
         bool close = false;
+        int design = 0;
+        int active_tab = 0;
 
         private Pen pen;
         private Pen pref1 = new Pen(Color.Yellow);
         private Pen pref2 = new Pen(Color.Red);
+        private Pen background;
 
         public GUI()
         {
+            if (design == null || design == 0)
+            {
+                design = 0;
+
+                this.colorlib = new ColorLib();
+
+                bg = colorlib.dark_green;
+                pref1 = new Pen(colorlib.yellow);
+                pref2 = new Pen(colorlib.red);
+            }
+            else if (design == 1)
+            {
+                this.colorlib = new ColorLib();
+
+                bg = colorlib.red;
+                pref1 = new Pen(colorlib.white);
+                pref2 = new Pen(colorlib.black);
+            }
+            else if (design == 2)
+            {
+                this.colorlib = new ColorLib();
+
+                bg = colorlib.blue;
+                pref1 = new Pen(colorlib.light_blue);
+                pref2 = new Pen(colorlib.white);
+            }
+
+            background = new Pen(bg);
+
             this.canvas = FullScreenCanvas.GetFullScreenCanvas();
-            this.canvas.Clear(Color.DarkSlateGray);
+            this.canvas.Clear(bg);
 
             this.pen = new Pen(Color.White);
             this.prevMouseState = MouseState.None;
@@ -40,6 +81,7 @@ namespace EQUINOX.Display
             this.savedPixels = new List<Tuple<Sys.Graphics.Point, Color>>();
 
             this.cancel = new Cancel(this.canvas);
+            this.tabBar = new TabBar(this.canvas);
 
             MouseManager.ScreenHeight = (UInt32) this.canvas.Mode.Rows;
             MouseManager.ScreenWidth = (UInt32) this.canvas.Mode.Columns;
@@ -140,7 +182,7 @@ namespace EQUINOX.Display
             if (MouseManager.MouseState == MouseState.Left && this.prevMouseState != MouseState.Left)
             {
                 close = this.cancel.tryCancelClick((Int32)MouseManager.X, (Int32)MouseManager.Y);
-
+                
                 if (close)
                 {
                     // 1. Disable graphics canvas
@@ -161,6 +203,74 @@ namespace EQUINOX.Display
 
                     return;
                 }
+
+                active_tab = this.tabBar.tryTabClick((Int32)MouseManager.X, (Int32)MouseManager.Y);
+
+                if (active_tab == 1)
+                {
+                    this.canvas.DrawFilledRectangle(background, 30, 350, 1000, 100);
+                    this.pref = new Pref(this.canvas);
+                    os_details = null;
+                }
+                else if (active_tab == 2) 
+                {
+                    this.canvas.DrawFilledRectangle(background, 30, 350, 1000, 100);
+                    os_details = new OS_Details(this.canvas);
+                    this.pref = null;
+                }
+
+                if (this.pref != null)
+                {
+                    design = this.pref.tryPrefClick((Int32)MouseManager.X, (Int32)MouseManager.Y);
+
+                    if (design == 3)
+                    {
+                        this.colorlib = new ColorLib();
+                        bg = colorlib.dark_green;
+                        pref1 = new Pen(colorlib.yellow);
+                        pref2 = new Pen(colorlib.red);
+                        background = new Pen(bg);
+
+                        redraw = new Redraw(bg, pref1.Color, pref2.Color);
+                        redraw.Draw(canvas);
+
+                        this.pref = null;
+                        this.cancel = new Cancel(this.canvas);
+                        this.tabBar = new TabBar(this.canvas);
+                    }
+                    else if (design == 1)
+                    {
+                        this.colorlib = new ColorLib();
+                        bg = colorlib.red;
+                        pref1 = new Pen(colorlib.white);
+                        pref2 = new Pen(colorlib.black);
+                        background = new Pen(bg);
+
+                        redraw = new Redraw(bg, pref1.Color, pref2.Color);
+                        redraw.Draw(canvas);
+
+                        this.pref = null;
+                        this.cancel = new Cancel(this.canvas);
+                        this.tabBar = new TabBar(this.canvas);
+                    }
+                    else if (design == 2)
+                    {
+                        this.colorlib = new ColorLib();
+                        bg = colorlib.blue;
+                        pref1 = new Pen(colorlib.light_blue);
+                        pref2 = new Pen(colorlib.white);
+                        background = new Pen(bg);
+
+                        redraw = new Redraw(bg, pref1.Color, pref2.Color);
+                        redraw.Draw(canvas);
+
+                        this.pref = null;
+                        this.cancel = new Cancel(this.canvas);
+                        this.tabBar = new TabBar(this.canvas);
+
+                    }
+                }
+
             }
 
             this.prevMouseState = MouseManager.MouseState;

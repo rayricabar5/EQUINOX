@@ -92,5 +92,19 @@ namespace EQUINOX.Features
 
             return "Launched GUI";
         }
+
+        public string Piano(string name, string[] args)
+        {
+            if (Kernel.piano != null)
+            {
+                return "Already have GUI";
+            }
+
+            Kernel.piano = new Piano();
+
+            return "Launched GUI";
+        }
+
+
     }
 }

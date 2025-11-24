@@ -9,6 +9,7 @@ using Sys = Cosmos.System;
 using Cosmos.System;
 using System.Runtime.CompilerServices;
 using Console = System.Console;
+using Cosmos.System.Graphics.Fonts;
 
 namespace EQUINOX.Display
 {
@@ -23,8 +24,10 @@ namespace EQUINOX.Display
             this.pen2 = new Pen(Color.Red);
             this.rows = canvas.Mode.Rows;
             this.cols = canvas.Mode.Columns;
+            var font = PCScreenFont.Default;
 
             canvas.DrawFilledRectangle(this.pen2, 925, 20, 75, 75);
+            canvas.DrawString("X", font, this.pen1, 960, 50);
         }
 
         public bool tryCancelClick (Int32 mouseX, Int32 mouseY)
