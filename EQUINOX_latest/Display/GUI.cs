@@ -38,6 +38,7 @@ namespace EQUINOX.Display
         private Pen pref1 = new Pen(Color.Yellow);
         private Pen pref2 = new Pen(Color.Red);
         private Pen background;
+        private Pen black;
 
         public GUI()
         {
@@ -74,6 +75,7 @@ namespace EQUINOX.Display
             this.canvas.Clear(bg);
 
             this.pen = new Pen(Color.White);
+            this.black = new Pen(Color.Black);
             this.prevMouseState = MouseState.None;
 
             this.px = 5;
@@ -130,6 +132,10 @@ namespace EQUINOX.Display
             this.canvas.DrawFilledRectangle(pref2, 670, 192, 60, 26);
             this.canvas.DrawFilledRectangle(pref2, 730, 192, 25, 78);
             this.canvas.DrawFilledRectangle(pref2, 645, 244, 85, 26);
+
+            //Components Box
+            this.canvas.DrawRectangle(black, 20, 300, 980, 320);
+
         }
 
         public void HandleGUIinputs()
@@ -208,13 +214,15 @@ namespace EQUINOX.Display
 
                 if (active_tab == 1)
                 {
-                    this.canvas.DrawFilledRectangle(background, 30, 350, 1000, 100);
+                    this.canvas.DrawFilledRectangle(background, 20, 300, 980, 320);
+                    this.canvas.DrawRectangle(black, 20, 300, 980, 320);
                     this.pref = new Pref(this.canvas);
                     os_details = null;
                 }
                 else if (active_tab == 2) 
                 {
-                    this.canvas.DrawFilledRectangle(background, 30, 350, 1000, 100);
+                    this.canvas.DrawFilledRectangle(background, 20, 300, 980, 320);
+                    this.canvas.DrawRectangle(black, 20, 300, 980, 320);
                     os_details = new OS_Details(this.canvas);
                     this.pref = null;
                 }

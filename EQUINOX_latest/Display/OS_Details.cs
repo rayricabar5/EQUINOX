@@ -39,7 +39,7 @@ namespace EQUINOX.Display
         };
 
         int startX = 40;       // starting X coordinate
-        int startY = 300;      // starting Y coordinate
+        int startY = 320;      // starting Y coordinate
         int lineHeight = 20;   // vertical spacing between lines
 
         public OS_Details(Canvas canvas)
@@ -54,32 +54,6 @@ namespace EQUINOX.Display
             {
                 canvas.DrawString(lines[i], font, this.white, startX, startY + i * lineHeight);
             }
-        }
-
-        public int tryDetailsClick(Int32 mouseX, Int32 mouseY)
-        {
-            if (new Rectangle(mouseX, mouseY, 1, 1).IntersectsWith(new Rectangle(40, 400, 125, 50)))
-            {
-                sound = new Music();
-                sound.DoReMi();
-                return 1;
-            }
-
-            if (new Rectangle(mouseX, mouseY, 1, 1).IntersectsWith(new Rectangle(310, 400, 125, 50)))
-            {
-                sound = new Music();
-                sound.DoReMi();
-                return 2;
-            }
-
-            if (new Rectangle(mouseX, mouseY, 1, 1).IntersectsWith(new Rectangle(570, 400, 125, 50)))
-            {
-                sound = new Music();
-                sound.DoReMi();
-                return 3;
-            }
-
-            return 0;
         }
     }
 }

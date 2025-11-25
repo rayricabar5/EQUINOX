@@ -20,6 +20,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Console = System.Console;
 using Sys = Cosmos.System;
+using IL2CPU.API.Attribs;
 
 
 namespace EQUINOX
@@ -54,20 +55,15 @@ namespace EQUINOX
             Console.WriteLine();
             Console.WriteLine("Equinox Booted.");
             Console.WriteLine();
-            Console.WriteLine("For the list of function, type \" help \"");
+            Console.WriteLine("For the list of functions, type \" help \"");
             Console.WriteLine();
 
             try
             {
-                var driver = AC97.Initialize(bufferSize: 4096);
-                if (driver == null)
-                {
-                    Console.WriteLine("AC97 not available, skipping voiceover.");
-                    return;
-                }
-
                 var mixer = new AudioMixer();
-                var audioStream = MemoryAudioStream.FromWave(tagline); // tagline = valid PCM16 WAV
+                //var audioStream = MemoryAudioStream.FromWave(tagline);
+                var audioStream = new MemoryAudioStream(new SampleFormat(AudioBitDepth.Bits16, 2, true), 48000, tagline);
+                var driver = AC97.Initialize(bufferSize: 4096);
                 mixer.Streams.Add(audioStream);
 
                 var audioManager = new AudioManager()
@@ -77,12 +73,13 @@ namespace EQUINOX
                 };
                 audioManager.Enable();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Console.WriteLine("Audio playback failed: " + e.Message);
+                Console.WriteLine("Audio initialization failed:");
+                Console.WriteLine(ex.Message);
             }
 
-            // Check the Availabile Volume\s for File Persistence
+            // Check for persistent volume
             if (Directory.Exists(@"0:\"))
             {
                 Console.WriteLine("Volume 0:\\ available for persistence.");
