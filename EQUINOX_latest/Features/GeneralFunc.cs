@@ -31,6 +31,7 @@ namespace EQUINOX.Features
             Console.WriteLine("- help");
             Console.WriteLine("- fs-help");
             Console.WriteLine("- echo <text>");
+            Console.WriteLine("- tictactoe");    
             Console.WriteLine("- calc");
             Console.WriteLine("- reboot");
             Console.WriteLine("- shutdown");
@@ -59,5 +60,23 @@ namespace EQUINOX.Features
             Console.WriteLine("- vfs-cat <diskPath>  : Show raw persistence file.");
             Console.WriteLine();
         }
+        public void LaunchTicTacToe()
+        {
+            Console.WriteLine("Launching Tic-Tac-Toe (Console Mode)...");
+            try
+            {
+                TicTacToe game = new TicTacToe();
+                game.Run();
+
+                Console.Clear();
+                Console.WriteLine("Returned to System.");
+                Help();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error launching game: " + e.Message);
+            }
+        }
+
     }
 }
