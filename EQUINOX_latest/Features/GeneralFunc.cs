@@ -31,6 +31,7 @@ namespace EQUINOX.Features
             Console.WriteLine("- help");
             Console.WriteLine("- fs-help");
             Console.WriteLine("- echo <text>");
+            Console.WriteLine("- wordle");
             Console.WriteLine("- tictactoe");    
             Console.WriteLine("- calc");
             Console.WriteLine("- reboot");
@@ -70,6 +71,28 @@ namespace EQUINOX.Features
 
                 Console.Clear();
                 Console.WriteLine("Returned to System.");
+                Help();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error launching game: " + e.Message);
+            }
+        }
+        public void LaunchWordle()
+        {
+            Console.WriteLine("Initializing Graphics Mode...");
+
+            try
+            {
+                Canvas canvas = FullScreenCanvas.GetFullScreenCanvas(new Mode(800, 600, ColorDepth.ColorDepth32));
+                canvas.Clear(Color.Black);
+                WordleGame game = new WordleGame(canvas);
+                game.Run();
+                canvas.Disable();
+                Console.Clear();
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Returned to Text Mode.");
+                Console.ForegroundColor = ConsoleColor.White;
                 Help();
             }
             catch (Exception e)
