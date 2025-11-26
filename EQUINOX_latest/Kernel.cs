@@ -140,6 +140,9 @@ namespace EQUINOX
                     case "echo":
                         Console.WriteLine(general.echo(args));
                         break;
+                    case "tictactoe":
+                        general.LaunchTicTacToe();
+                        break;
                     case "calc":
                         calculator.Calculate(args);
                         break;
