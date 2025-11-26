@@ -20,7 +20,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Console = System.Console;
 using Sys = Cosmos.System;
-using IL2CPU.API.Attribs;
+using EQUINOX.Audio;
 
 
 namespace EQUINOX
@@ -30,6 +30,7 @@ namespace EQUINOX
 
         // FS NEW: file system (manual persistence)
         private readonly FileSystem _fs = new FileSystem();
+        private bool logged_in = false;
 
         // VFS NEW
         private CosmosVFS _vfs;
@@ -37,15 +38,15 @@ namespace EQUINOX
         //GUI
         public static GUI gui;
         public static Piano piano;
+        public static Voice voice;
         public LaunchGUI launcher;
 
         //GeneralFunc
         public GeneralFunc general;
+        public AccountSystem account;
 
         //Math
         public Calculator calculator;
-
-        [ManifestResourceStream(ResourceName = "EQUINOX_latest.tagline.wav")] public static byte[] tagline;
 
         protected override void BeforeRun()
         {
@@ -60,18 +61,7 @@ namespace EQUINOX
 
             try
             {
-                var mixer = new AudioMixer();
-                //var audioStream = MemoryAudioStream.FromWave(tagline);
-                var audioStream = new MemoryAudioStream(new SampleFormat(AudioBitDepth.Bits16, 2, true), 48000, tagline);
-                var driver = AC97.Initialize(bufferSize: 4096);
-                mixer.Streams.Add(audioStream);
-
-                var audioManager = new AudioManager()
-                {
-                    Stream = mixer,
-                    Output = driver
-                };
-                audioManager.Enable();
+                voice.VoiceOver();
             }
             catch (Exception ex)
             {
@@ -88,31 +78,39 @@ namespace EQUINOX
             {
                 Console.WriteLine("Warning: 0:\\ not found. Create or mount a disk if persistence is needed.");
             }
+
+            logged_in = account.CreateAccount();
         }
 
         protected override void Run()
         {
-
-            if (Kernel.gui != null) 
+            if (logged_in)
             { 
-                Kernel.gui.HandleGUIinputs();
-                return;
-            }
+                if (Kernel.gui != null) 
+                { 
+                    Kernel.gui.HandleGUIinputs();
+                    return;
+                }
 
-            if (Kernel.piano != null)
+                if (Kernel.piano != null)
+                {
+                    Kernel.piano.HandleGUIinputs();
+                    return;
+                }
+
+                string choice;
+
+                Console.WriteLine();
+                Console.Write("> ");
+
+                choice = Console.ReadLine();
+
+                commandHandler(choice);
+            }
+            else if (!logged_in)
             {
-                Kernel.piano.HandleGUIinputs();
-                return;
+                Cosmos.System.Power.Shutdown();
             }
-
-            string choice;
-
-            Console.WriteLine();
-            Console.Write("> ");
-
-            choice = Console.ReadLine();
-
-            commandHandler(choice);
         }
 
         protected override void AfterRun()
@@ -291,6 +289,9 @@ namespace EQUINOX
                         break;
                     case "piano":
                         Console.WriteLine(launcher.Piano("Piano", args));
+                        break;
+                    case "user":
+                        account.ViewUsers();
                         break;
                     default:
                         Console.WriteLine("Invalid command");
