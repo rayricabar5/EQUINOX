@@ -138,6 +138,9 @@ namespace EQUINOX
                     case "echo":
                         Console.WriteLine(general.echo(args));
                         break;
+                    case"wordle":
+                        general.LaunchWordle();
+                        break;
                     case "tictactoe":
                         general.LaunchTicTacToe();
                         break;
