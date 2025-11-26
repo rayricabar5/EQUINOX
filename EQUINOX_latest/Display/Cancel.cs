@@ -21,7 +21,7 @@ namespace EQUINOX.Display
         public Cancel(Canvas canvas) 
         {
             this.pen1 = new Pen(Color.White);
-            this.pen2 = new Pen(Color.Red);
+            this.pen2 = new Pen(Color.Crimson);
             this.rows = canvas.Mode.Rows;
             this.cols = canvas.Mode.Columns;
             var font = PCScreenFont.Default;

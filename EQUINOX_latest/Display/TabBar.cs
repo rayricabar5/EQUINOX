@@ -48,7 +48,6 @@ namespace EQUINOX.Display
 
             if (new Rectangle(mouseX, mouseY, 1, 1).IntersectsWith(new Rectangle(540, 650, 75, 75)))
             {
-                //sound.DoTiLa();
                 return 2;
             }
 

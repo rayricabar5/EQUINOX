@@ -1,6 +1,8 @@
 ﻿using Cosmos.HAL;
 using Cosmos.System;
 using Cosmos.System.Graphics;
+using Cosmos.System.Graphics.Fonts;
+using EQUINOX.Audio;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -10,7 +12,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Console = System.Console;
 using Sys = Cosmos.System;
-using EQUINOX.Audio;
 
 namespace EQUINOX.Display
 {
@@ -28,6 +29,7 @@ namespace EQUINOX.Display
         private Pen pen;
         private Pen gray = new Pen(Color.Gray);
         private Pen black = new Pen(Color.Black);
+        private Pen white = new Pen(Color.White);
 
         bool close = false;
 
@@ -47,10 +49,12 @@ namespace EQUINOX.Display
             this.cancel = new Cancel(this.canvas);
             this.key = new Music();
 
+            var font = PCScreenFont.Default;
+
             MouseManager.ScreenHeight = (UInt32)this.canvas.Mode.Rows;
             MouseManager.ScreenWidth = (UInt32)this.canvas.Mode.Columns;
 
-            int startX = 212;
+            int startX = 275;
             int y = 100;
             int keyW = 75;
             int keyH = 375;
@@ -58,42 +62,52 @@ namespace EQUINOX.Display
             // A3
             this.canvas.DrawFilledRectangle(gray, startX - keyW * 2, y, keyW, keyH);
             this.canvas.DrawRectangle(black, startX - keyW * 2, y, keyW, keyH);
+            this.canvas.DrawString("A3", font, this.white, (startX - keyW * 2) + (keyW / 2) - 2, y + keyH + 15);
 
             // B3
             this.canvas.DrawFilledRectangle(gray, startX - keyW, y, keyW, keyH);
             this.canvas.DrawRectangle(black, startX - keyW, y, keyW, keyH);
+            this.canvas.DrawString("B3", font, this.white, (startX - keyW) + (keyW / 2) - 2, y + keyH + 15);
 
             // C
             this.canvas.DrawFilledRectangle(gray, startX, y, keyW, keyH);
             this.canvas.DrawRectangle(black, startX, y, keyW, keyH);
+            this.canvas.DrawString("C4", font, this.white, startX + (keyW / 2) - 2, y + keyH + 15);
 
             // D
             this.canvas.DrawFilledRectangle(gray, startX + keyW, y, keyW, keyH);
             this.canvas.DrawRectangle(black, startX + keyW, y, keyW, keyH);
+            this.canvas.DrawString("D4", font, this.white, (startX + keyW) + (keyW / 2) - 2, y + keyH + 15);
 
             // E
             this.canvas.DrawFilledRectangle(gray, startX + keyW * 2, y, keyW, keyH);
             this.canvas.DrawRectangle(black, startX + keyW * 2, y, keyW, keyH);
+            this.canvas.DrawString("E4", font, this.white, (startX + keyW * 2) + (keyW / 2) - 2, y + keyH + 15);
 
             // F
             this.canvas.DrawFilledRectangle(gray, startX + keyW * 3, y, keyW, keyH);
             this.canvas.DrawRectangle(black, startX + keyW * 3, y, keyW, keyH);
+            this.canvas.DrawString("F4", font, this.white, (startX + keyW * 3) + (keyW / 2) - 2, y + keyH + 15);
 
             // G
             this.canvas.DrawFilledRectangle(gray, startX + keyW * 4, y, keyW, keyH);
             this.canvas.DrawRectangle(black, startX + keyW * 4, y, keyW, keyH);
+            this.canvas.DrawString("G4", font, this.white, (startX + keyW * 4) + (keyW / 2) - 2, y + keyH + 15);
 
             // A
             this.canvas.DrawFilledRectangle(gray, startX + keyW * 5, y, keyW, keyH);
             this.canvas.DrawRectangle(black, startX + keyW * 5, y, keyW, keyH);
+            this.canvas.DrawString("A4", font, this.white, (startX + keyW * 5) + (keyW / 2) - 2, y + keyH + 15);
 
             // B
             this.canvas.DrawFilledRectangle(gray, startX + keyW * 6, y, keyW, keyH);
             this.canvas.DrawRectangle(black, startX + keyW * 6, y, keyW, keyH);
+            this.canvas.DrawString("B4", font, this.white, (startX + keyW * 6) + (keyW / 2) - 2, y + keyH + 15);
 
             // C5
             this.canvas.DrawFilledRectangle(gray, startX + keyW * 7, y, keyW, keyH);
             this.canvas.DrawRectangle(black, startX + keyW * 7, y, keyW, keyH);
+            this.canvas.DrawString("C5", font, this.white, (startX + keyW * 7) + (keyW / 2) - 2, y + keyH + 15);
         }
 
         public void HandleGUIinputs()
@@ -177,7 +191,7 @@ namespace EQUINOX.Display
         {
             Rectangle p = new Rectangle(mouseX, mouseY, 1, 1);
 
-            int startX = 212;
+            int startX = 275;
             int y = 100;
             int keyW = 75;
             int keyH = 375;

@@ -1,6 +1,7 @@
 ﻿using Cosmos.System.Graphics;
 using Cosmos.System.Graphics.Fonts;
 using EQUINOX.Audio;
+using EQUINOX.Features;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -23,6 +24,7 @@ namespace EQUINOX.Display
         private Int32 rows, cols;
 
         public Music sound;
+        private SavePref pref;
 
         public Pref(Canvas canvas)
         {
@@ -55,30 +57,27 @@ namespace EQUINOX.Display
             canvas.DrawString("Veggie Salad", font, this.white, 720, 415);
         }
 
-        public int tryPrefClick(Int32 mouseX, Int32 mouseY)
+        public bool tryPrefClick(Int32 mouseX, Int32 mouseY)
         {
             if (new Rectangle(mouseX, mouseY, 1, 1).IntersectsWith(new Rectangle(40, 400, 125, 50)))
             {
-                sound = new Music();
-                sound.DoReMi();
-                return 1;
+                pref.SavePreference("Deck of Cards");
+                return true;
             }
 
             if (new Rectangle(mouseX, mouseY, 1, 1).IntersectsWith(new Rectangle(310, 400, 125, 50)))
             {
-                sound = new Music();
-                sound.DoReMi();
-                return 2;
+                pref.SavePreference("Skyline");
+                return true;
             }
 
             if (new Rectangle(mouseX, mouseY, 1, 1).IntersectsWith(new Rectangle(570, 400, 125, 50)))
             {
-                sound = new Music();
-                sound.DoReMi();
-                return 3;
+                pref.SavePreference("Veggie Salad");
+                return true;
             }
 
-            return 0;
+            return false;
         }
 
     }

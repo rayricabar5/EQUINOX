@@ -2,6 +2,7 @@
 using Cosmos.System;
 using Cosmos.System.Graphics;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -74,6 +75,10 @@ namespace EQUINOX.Display
             canvas.DrawFilledRectangle(pen2, 670, 192, 60, 26);
             canvas.DrawFilledRectangle(pen2, 730, 192, 25, 78);
             canvas.DrawFilledRectangle(pen2, 645, 244, 85, 26);
+
+
+            canvas.DrawFilledRectangle(new Pen(bg), 20, 300, 980, 320);
+            canvas.DrawRectangle(new Pen(Color.Black), 20, 300, 980, 320);
         }
     }
 
