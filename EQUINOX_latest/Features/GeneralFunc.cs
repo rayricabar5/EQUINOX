@@ -10,7 +10,7 @@ namespace EQUINOX.Features
 {
     public class GeneralFunc
     {
-        // 1. Define a Color Palette for consistency
+        // --- THEME COLORS ---
         private const ConsoleColor HeaderColor = ConsoleColor.Cyan;
         private const ConsoleColor CmdColor = ConsoleColor.Yellow;
         private const ConsoleColor DescColor = ConsoleColor.Gray;
@@ -21,10 +21,94 @@ namespace EQUINOX.Features
             return string.Join(" ", words);
         }
 
-        // 2. Main Help Menu with Visual Improvements
+        // --- BOOT ANIMATION ---
+        public void BootAnimation()
+        {
+            Console.Clear();
+
+            // Draw Logo
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("\n\n");
+            Console.WriteLine(@"
+  _____           _  _        ____   _____ 
+ |_   _|         | |(_)      / __ \ / ____|
+   | |  _ __   __| | _  ___ | |  | | (___  
+   | | | '_ \ / _` || |/ _ \| |  | |\___ \ 
+  _| |_| | | | (_| || |  __/| |__| |____) |
+ |_____|_| |_|\__,_||_|\___| \____/|_____/ 
+            ");
+            Console.ResetColor();
+
+            Console.WriteLine("\n");
+            Console.Write("    System is starting... ");
+
+            // Manual Progress Bar
+            int barStart = Console.CursorLeft;
+            Console.Write("[                              ]"); // 30 spaces
+            Console.CursorLeft = barStart + 1;
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            for (int i = 0; i < 30; i++)
+            {
+                Console.Write("=");
+                // Dummy loop for delay
+                for (long x = 0; x < 2000000; x++) {; }
+            }
+            Console.ResetColor();
+            Console.WriteLine("\n");
+
+            PrintBootStatus("Initializing Kernel modules...");
+            PrintBootStatus("Mounting Virtual File System...");
+            PrintBootStatus("Checking Peripheral Devices...");
+            PrintBootStatus("Loading User Shell...");
+
+            // Final delay
+            for (long x = 0; x < 3000000; x++) {; }
+
+            // Clear to start fresh
+            Console.Clear();
+
+            // Show the main static logo
+            DrawLogo();
+        }
+
+        private void PrintBootStatus(string text)
+        {
+            Console.Write("    [");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write(" OK ");
+            Console.ResetColor();
+            Console.WriteLine($"] {text}");
+
+            // Delay
+            for (long x = 0; x < 1500000; x++) {; }
+        }
+
+        // --- DRAW INDIEOS LOGO ---
+        public void DrawLogo()
+        {
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine(@"
+  _____           _  _        ____   _____ 
+ |_   _|         | |(_)      / __ \ / ____|
+   | |  _ __   __| | _  ___ | |  | | (___  
+   | | | '_ \ / _` || |/ _ \| |  | |\___ \ 
+  _| |_| | | | (_| || |  __/| |__| |____) |
+ |_____|_| |_|\__,_||_|\___| \____/|_____/ 
+            ");
+            Console.ResetColor();
+            Console.WriteLine("\n       Welcome to IndieOS v1.0");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine("       Type 'help' for commands.");
+            Console.ResetColor();
+            Console.WriteLine();
+        }
+
+        // --- MAIN HELP MENU ---
         public void Help()
         {
-            DrawHeader("SYSTEM MENU");
+            DrawHeader("INDIEOS MENU");
 
             Console.WriteLine();
             PrintSection("  [ SYSTEM ]");
@@ -33,6 +117,7 @@ namespace EQUINOX.Features
             PrintItem("echo <txt>", "Repeat input text");
             PrintItem("reboot", "Restart the machine");
             PrintItem("shutdown", "Power off the system");
+            PrintItem("cls", "Clear the screen");
 
             Console.WriteLine();
             PrintSection("  [ APPLICATIONS ]");
@@ -44,10 +129,10 @@ namespace EQUINOX.Features
             DrawFooter();
         }
 
-        // 3. File System Menu with Tables
+        // --- FILE SYSTEM HELP ---
         public void FsHelp()
         {
-            DrawHeader("FILE SYSTEM MANAGER");
+            DrawHeader("INDIEOS FILESYSTEM");
 
             Console.WriteLine();
             PrintSection("  [ NAVIGATION & INFO ]");
@@ -78,27 +163,19 @@ namespace EQUINOX.Features
             DrawFooter();
         }
 
-        // --- VISUAL HELPER METHODS ---
-
-        // Prints a command and description in two columns with colors
+        // --- HELPER: PRINTING ---
         private void PrintItem(string cmd, string desc)
         {
-            Console.Write("    "); // Indent
+            Console.Write("    ");
             Console.ForegroundColor = CmdColor;
-
-            // PadRight ensures the description always starts at the same column
             Console.Write(cmd.PadRight(18));
-
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write("| "); // Separator
-
+            Console.Write("| ");
             Console.ForegroundColor = DescColor;
             Console.WriteLine(desc);
-
             Console.ResetColor();
         }
 
-        // Prints a section title (e.g., [ SYSTEM ])
         private void PrintSection(string title)
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -106,23 +183,18 @@ namespace EQUINOX.Features
             Console.ResetColor();
         }
 
-        // Draws a bar at the top
         private void DrawHeader(string title)
         {
             Console.ForegroundColor = BorderColor;
             Console.WriteLine(new string('=', 50));
-
             Console.ForegroundColor = HeaderColor;
-            // Center the title roughly
             int spaces = (50 - title.Length) / 2;
             Console.WriteLine(new string(' ', spaces) + title);
-
             Console.ForegroundColor = BorderColor;
             Console.WriteLine(new string('=', 50));
             Console.ResetColor();
         }
 
-        // Draws a bar at the bottom
         private void DrawFooter()
         {
             Console.ForegroundColor = BorderColor;
@@ -130,20 +202,23 @@ namespace EQUINOX.Features
             Console.ResetColor();
         }
 
-        // --- GAME LAUNCHERS (Kept mostly the same, just added cleanup) ---
+        private void PrintError(string msg)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("ERROR: " + msg);
+            Console.ResetColor();
+        }
 
+        // --- LAUNCHERS ---
         public void LaunchTicTacToe()
         {
-            Console.Clear(); // Clean slate for the game
-            DrawHeader("TIC TAC TOE");
+            Console.Clear();
             try
             {
                 TicTacToe game = new TicTacToe();
                 game.Run();
-
                 Console.Clear();
-                // Instead of just text, maybe a welcome back message?
-                Help();
+                DrawLogo(); // Redraw logo when coming back
             }
             catch (Exception e)
             {
@@ -160,37 +235,17 @@ namespace EQUINOX.Features
                 canvas.Clear(Color.Black);
                 WordleGame game = new WordleGame(canvas);
                 game.Run();
+
+                // Disable graphics to return to text mode
                 canvas.Disable();
 
                 Console.Clear();
-                Help();
+                DrawLogo(); // Redraw logo when coming back
             }
             catch (Exception e)
             {
                 PrintError(e.Message);
             }
-        }
-
-        private void PrintError(string msg)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("ERROR: " + msg);
-            Console.ResetColor();
-        }
-
-        public void DrawLogo()
-        {
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine(@"
-  ______ ____   _    _  _____ _   _  _____  __   __
- |  ____/ __ \ | |  | ||_   _| \ | |/ __  \ \ \ / /
- | |__ | |  | || |  | |  | | |  \| || |  | | \ V / 
- |  __|| |  | || |  | |  | | | . ` || |  | |  > <  
- | |___| |__| || |__| | _| |_| |\  || |__| | / . \ 
- |______\___\_\ \____/ |_____|_| \_|\_____/ /_/ \_\
-                                                     
-    ");
-            Console.ResetColor();
         }
     }
 }
