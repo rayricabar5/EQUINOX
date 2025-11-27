@@ -1,87 +1,159 @@
 ﻿using Cosmos.System;
 using Cosmos.System.FileSystem;
-using Cosmos.System.FileSystem.VFS;
 using Cosmos.System.Graphics;
-using Cosmos.System.Graphics.Fonts;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
-using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
 using Console = System.Console;
-using Sys = Cosmos.System;
 using EQUINOX.Display;
 
 namespace EQUINOX.Features
 {
     public class GeneralFunc
     {
+        // 1. Define a Color Palette for consistency
+        private const ConsoleColor HeaderColor = ConsoleColor.Cyan;
+        private const ConsoleColor CmdColor = ConsoleColor.Yellow;
+        private const ConsoleColor DescColor = ConsoleColor.Gray;
+        private const ConsoleColor BorderColor = ConsoleColor.DarkGray;
+
         public string echo(string[] words)
         {
-            string output = string.Join(" ", words);
-            return output;
+            return string.Join(" ", words);
         }
 
+        // 2. Main Help Menu with Visual Improvements
         public void Help()
         {
+            DrawHeader("SYSTEM MENU");
+
             Console.WriteLine();
-            Console.WriteLine("System Commands:");
-            Console.WriteLine("- help");
-            Console.WriteLine("- fs-help");
-            Console.WriteLine("- echo <text>");
-            Console.WriteLine("- wordle");
-            Console.WriteLine("- tictactoe");    
-            Console.WriteLine("- calc");
-            Console.WriteLine("- reboot");
-            Console.WriteLine("- shutdown");
-            Console.WriteLine("- canvas");
+            PrintSection("  [ SYSTEM ]");
+            PrintItem("help", "Show this system menu");
+            PrintItem("fs-help", "Show file system commands");
+            PrintItem("echo <txt>", "Repeat input text");
+            PrintItem("reboot", "Restart the machine");
+            PrintItem("shutdown", "Power off the system");
+
             Console.WriteLine();
+            PrintSection("  [ APPLICATIONS ]");
+            PrintItem("wordle", "Play Wordle (GUI Mode)");
+            PrintItem("tictactoe", "Play Tic-Tac-Toe (Console)");
+            PrintItem("calc", "Calculator tool");
+            PrintItem("canvas", "Enter drawing mode");
+
+            DrawFooter();
         }
 
-        // File System Console
+        // 3. File System Menu with Tables
         public void FsHelp()
         {
-            Console.WriteLine("File / Directory management commands:");
-            Console.WriteLine("- pwd                 : Show current working directory.");
-            Console.WriteLine("- ls [path]           : List entries (current or specified path).");
-            Console.WriteLine("- mkdir <path>        : Create directory.");
-            Console.WriteLine("- touch <path>        : Create empty file or update timestamp.");
-            Console.WriteLine("- write <path> <text> : Overwrite file content.");
-            Console.WriteLine("- append <path> <text>: Append to file.");
-            Console.WriteLine("- cat <path>          : Display file contents.");
-            Console.WriteLine("- mv <path> <newname> : Rename (same directory).");
-            Console.WriteLine("- cp <src> <dest>     : Copy file or directory (dest may be existing dir or new path).");
-            Console.WriteLine("- rm <path>           : Delete file or empty directory.");
-            Console.WriteLine("- cd <path>           : Change directory (supports .. and absolute).");
-            Console.WriteLine("- find <term>         : Search names containing term.");
-            Console.WriteLine("- fs-save <vfsPath>   : Persist all (e.g. 0:\\equifs.dat).");
-            Console.WriteLine("- fs-load <vfsPath>   : Load persisted state.");
-            Console.WriteLine("- vfs-cat <diskPath>  : Show raw persistence file.");
+            DrawHeader("FILE SYSTEM MANAGER");
+
             Console.WriteLine();
+            PrintSection("  [ NAVIGATION & INFO ]");
+            PrintItem("pwd", "Print working directory");
+            PrintItem("ls [path]", "List directory contents");
+            PrintItem("cd <path>", "Change directory");
+            PrintItem("find <txt>", "Search for files");
+
+            Console.WriteLine();
+            PrintSection("  [ MANIPULATION ]");
+            PrintItem("mkdir <path>", "Create new directory");
+            PrintItem("touch <path>", "Create file / update time");
+            PrintItem("cp <src> <dst>", "Copy file or directory");
+            PrintItem("mv <src> <new>", "Rename or move item");
+            PrintItem("rm <path>", "Remove file or directory");
+
+            Console.WriteLine();
+            PrintSection("  [ I/O OPERATIONS ]");
+            PrintItem("write <p> <t>", "Overwrite file content");
+            PrintItem("append <p> <t>", "Add text to end of file");
+            PrintItem("cat <path>", "Read file contents");
+
+            Console.WriteLine();
+            PrintSection("  [ STORAGE ]");
+            PrintItem("fs-save", "Save Virtual File System");
+            PrintItem("fs-load", "Load Virtual File System");
+
+            DrawFooter();
         }
+
+        // --- VISUAL HELPER METHODS ---
+
+        // Prints a command and description in two columns with colors
+        private void PrintItem(string cmd, string desc)
+        {
+            Console.Write("    "); // Indent
+            Console.ForegroundColor = CmdColor;
+
+            // PadRight ensures the description always starts at the same column
+            Console.Write(cmd.PadRight(18));
+
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write("| "); // Separator
+
+            Console.ForegroundColor = DescColor;
+            Console.WriteLine(desc);
+
+            Console.ResetColor();
+        }
+
+        // Prints a section title (e.g., [ SYSTEM ])
+        private void PrintSection(string title)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(title);
+            Console.ResetColor();
+        }
+
+        // Draws a bar at the top
+        private void DrawHeader(string title)
+        {
+            Console.ForegroundColor = BorderColor;
+            Console.WriteLine(new string('=', 50));
+
+            Console.ForegroundColor = HeaderColor;
+            // Center the title roughly
+            int spaces = (50 - title.Length) / 2;
+            Console.WriteLine(new string(' ', spaces) + title);
+
+            Console.ForegroundColor = BorderColor;
+            Console.WriteLine(new string('=', 50));
+            Console.ResetColor();
+        }
+
+        // Draws a bar at the bottom
+        private void DrawFooter()
+        {
+            Console.ForegroundColor = BorderColor;
+            Console.WriteLine(new string('-', 50));
+            Console.ResetColor();
+        }
+
+        // --- GAME LAUNCHERS (Kept mostly the same, just added cleanup) ---
+
         public void LaunchTicTacToe()
         {
-            Console.WriteLine("Launching Tic-Tac-Toe (Console Mode)...");
+            Console.Clear(); // Clean slate for the game
+            DrawHeader("TIC TAC TOE");
             try
             {
                 TicTacToe game = new TicTacToe();
                 game.Run();
 
                 Console.Clear();
-                Console.WriteLine("Returned to System.");
+                // Instead of just text, maybe a welcome back message?
                 Help();
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error launching game: " + e.Message);
+                PrintError(e.Message);
             }
         }
+
         public void LaunchWordle()
         {
             Console.WriteLine("Initializing Graphics Mode...");
-
             try
             {
                 Canvas canvas = FullScreenCanvas.GetFullScreenCanvas(new Mode(800, 600, ColorDepth.ColorDepth32));
@@ -89,17 +161,36 @@ namespace EQUINOX.Features
                 WordleGame game = new WordleGame(canvas);
                 game.Run();
                 canvas.Disable();
+
                 Console.Clear();
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Returned to Text Mode.");
-                Console.ForegroundColor = ConsoleColor.White;
                 Help();
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error launching game: " + e.Message);
+                PrintError(e.Message);
             }
         }
 
+        private void PrintError(string msg)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("ERROR: " + msg);
+            Console.ResetColor();
+        }
+
+        public void DrawLogo()
+        {
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine(@"
+  ______ ____   _    _  _____ _   _  _____  __   __
+ |  ____/ __ \ | |  | ||_   _| \ | |/ __  \ \ \ / /
+ | |__ | |  | || |  | |  | | |  \| || |  | | \ V / 
+ |  __|| |  | || |  | |  | | | . ` || |  | |  > <  
+ | |___| |__| || |__| | _| |_| |\  || |__| | / . \ 
+ |______\___\_\ \____/ |_____|_| \_|\_____/ /_/ \_\
+                                                     
+    ");
+            Console.ResetColor();
+        }
     }
 }
