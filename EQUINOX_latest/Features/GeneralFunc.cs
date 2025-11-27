@@ -10,11 +10,12 @@ namespace EQUINOX.Features
 {
     public class GeneralFunc
     {
-        // --- THEME COLORS ---
-        private const ConsoleColor HeaderColor = ConsoleColor.Cyan;
-        private const ConsoleColor CmdColor = ConsoleColor.Yellow;
-        private const ConsoleColor DescColor = ConsoleColor.Gray;
-        private const ConsoleColor BorderColor = ConsoleColor.DarkGray;
+        // --- THEME COLORS (Matched to AccountSystem) ---
+        private const ConsoleColor ClrBorder = ConsoleColor.Cyan;
+        private const ConsoleColor ClrHeader = ConsoleColor.White;
+        private const ConsoleColor ClrCmd = ConsoleColor.Yellow;
+        private const ConsoleColor ClrDesc = ConsoleColor.Gray;
+        private const ConsoleColor ClrSuccess = ConsoleColor.Green;
 
         public string echo(string[] words)
         {
@@ -27,28 +28,29 @@ namespace EQUINOX.Features
             Console.Clear();
 
             // Draw Logo
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("\n\n");
-            Console.WriteLine(@"
-  _____           _  _        ____   _____ 
- |_   _|         | |(_)      / __ \ / ____|
-   | |  _ __   __| | _  ___ | |  | | (___  
-   | | | '_ \ / _` || |/ _ \| |  | |\___ \ 
-  _| |_| | | | (_| || |  __/| |__| |____) |
- |_____|_| |_|\__,_||_|\___| \____/|_____/ 
-            ");
-            Console.ResetColor();
+            DrawCenteredLogo();
 
             Console.WriteLine("\n");
-            Console.Write("    System is starting... ");
 
-            // Manual Progress Bar
+            // Centered Loading Bar
+            string loadingText = "System is starting...";
+            int centerText = (Console.WindowWidth - loadingText.Length) / 2;
+            Console.SetCursorPosition(centerText, Console.CursorTop);
+            Console.Write(loadingText);
+            Console.WriteLine("\n");
+
+            int barWidth = 30;
+            int centerBar = (Console.WindowWidth - barWidth) / 2;
+
+            Console.SetCursorPosition(centerBar - 1, Console.CursorTop);
+            Console.Write("[");
             int barStart = Console.CursorLeft;
-            Console.Write("[                              ]"); // 30 spaces
-            Console.CursorLeft = barStart + 1;
+            Console.Write(new string(' ', barWidth));
+            Console.Write("]");
 
-            Console.ForegroundColor = ConsoleColor.Green;
-            for (int i = 0; i < 30; i++)
+            Console.CursorLeft = barStart;
+            Console.ForegroundColor = ClrSuccess;
+            for (int i = 0; i < barWidth; i++)
             {
                 Console.Write("=");
                 // Dummy loop for delay
@@ -74,8 +76,13 @@ namespace EQUINOX.Features
 
         private void PrintBootStatus(string text)
         {
-            Console.Write("    [");
-            Console.ForegroundColor = ConsoleColor.Green;
+            // Center the boot status lines slightly
+            int indent = (Console.WindowWidth - 50) / 2;
+            if (indent < 0) indent = 0;
+            Console.SetCursorPosition(indent, Console.CursorTop);
+
+            Console.Write("[");
+            Console.ForegroundColor = ClrSuccess;
             Console.Write(" OK ");
             Console.ResetColor();
             Console.WriteLine($"] {text}");
@@ -84,25 +91,39 @@ namespace EQUINOX.Features
             for (long x = 0; x < 1500000; x++) {; }
         }
 
-        // --- DRAW INDIEOS LOGO ---
+        // --- DRAW INDIEOS LOGO (Centered) ---
         public void DrawLogo()
         {
             Console.Clear();
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine(@"
-  _____           _  _        ____   _____ 
- |_   _|         | |(_)      / __ \ / ____|
-   | |  _ __   __| | _  ___ | |  | | (___  
-   | | | '_ \ / _` || |/ _ \| |  | |\___ \ 
-  _| |_| | | | (_| || |  __/| |__| |____) |
- |_____|_| |_|\__,_||_|\___| \____/|_____/ 
-            ");
-            Console.ResetColor();
-            Console.WriteLine("\n       Welcome to IndieOS v1.0");
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine("       Type 'help' for commands.");
-            Console.ResetColor();
+            DrawCenteredLogo();
+
+            Console.WriteLine("\n");
+            CenterText("Welcome to IndieOS v1.0", ConsoleColor.White);
+            CenterText("Type 'help' for commands.", ConsoleColor.DarkGray);
             Console.WriteLine();
+        }
+
+        private void DrawCenteredLogo()
+        {
+            string[] logo = new string[]
+            {
+                @"  _____           _  _        ____   _____ ",
+                @" |_   _|         | |(_)      / __ \ / ____|",
+                @"   | |  _ __   __| | _  ___ | |  | | (___  ",
+                @"   | | | '_ \ / _` || |/ _ \| |  | |\___ \ ",
+                @"  _| |_| | | | (_| || |  __/| |__| |____) |",
+                @" |_____|_| |_|\__,_||_|\___| \____/|_____/ "
+            };
+
+            Console.ForegroundColor = ClrBorder;
+            foreach (string line in logo)
+            {
+                int centerX = (Console.WindowWidth - line.Length) / 2;
+                if (centerX < 0) centerX = 0;
+                Console.SetCursorPosition(centerX, Console.CursorTop);
+                Console.WriteLine(line);
+            }
+            Console.ResetColor();
         }
 
         // --- MAIN HELP MENU ---
@@ -111,22 +132,26 @@ namespace EQUINOX.Features
             DrawHeader("INDIEOS MENU");
 
             Console.WriteLine();
-            PrintSection("  [ SYSTEM ]");
+            PrintSection(" [ SYSTEM ]");
             PrintItem("help", "Show this system menu");
             PrintItem("fs-help", "Show file system commands");
             PrintItem("echo <txt>", "Repeat input text");
             PrintItem("reboot", "Restart the machine");
             PrintItem("shutdown", "Power off the system");
             PrintItem("cls", "Clear the screen");
+            PrintItem("launch-gui", "Enter GUI mode");
+            PrintItem("user", "View username and password");
 
             Console.WriteLine();
-            PrintSection("  [ APPLICATIONS ]");
-            PrintItem("wordle", "Play Wordle (GUI Mode)");
-            PrintItem("tictactoe", "Play Tic-Tac-Toe (Console)");
+            PrintSection(" [ APPLICATIONS ]");
+            PrintItem("wordle", "Play Wordle");
+            PrintItem("tictactoe", "Play Tic-Tac-Toe");
             PrintItem("calc", "Calculator tool");
+            PrintItem("piano", "Play Piano Synth");
             PrintItem("canvas", "Enter drawing mode");
 
-            DrawFooter();
+            Console.WriteLine();
+            DrawHeader("END OF MENU");
         }
 
         // --- FILE SYSTEM HELP ---
@@ -135,14 +160,14 @@ namespace EQUINOX.Features
             DrawHeader("INDIEOS FILESYSTEM");
 
             Console.WriteLine();
-            PrintSection("  [ NAVIGATION & INFO ]");
+            PrintSection(" [ NAVIGATION & INFO ]");
             PrintItem("pwd", "Print working directory");
             PrintItem("ls [path]", "List directory contents");
             PrintItem("cd <path>", "Change directory");
             PrintItem("find <txt>", "Search for files");
 
             Console.WriteLine();
-            PrintSection("  [ MANIPULATION ]");
+            PrintSection(" [ MANIPULATION ]");
             PrintItem("mkdir <path>", "Create new directory");
             PrintItem("touch <path>", "Create file / update time");
             PrintItem("cp <src> <dst>", "Copy file or directory");
@@ -150,55 +175,71 @@ namespace EQUINOX.Features
             PrintItem("rm <path>", "Remove file or directory");
 
             Console.WriteLine();
-            PrintSection("  [ I/O OPERATIONS ]");
+            PrintSection(" [ I/O OPERATIONS ]");
             PrintItem("write <p> <t>", "Overwrite file content");
             PrintItem("append <p> <t>", "Add text to end of file");
             PrintItem("cat <path>", "Read file contents");
 
             Console.WriteLine();
-            PrintSection("  [ STORAGE ]");
+            PrintSection(" [ STORAGE ]");
             PrintItem("fs-save", "Save Virtual File System");
             PrintItem("fs-load", "Load Virtual File System");
 
-            DrawFooter();
+            Console.WriteLine();
+            DrawHeader("END OF LIST");
         }
 
         // --- HELPER: PRINTING ---
+
         private void PrintItem(string cmd, string desc)
         {
+            // Indent items for cleaner look
             Console.Write("    ");
-            Console.ForegroundColor = CmdColor;
+
+            Console.ForegroundColor = ClrCmd;
             Console.Write(cmd.PadRight(18));
+
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("| ");
-            Console.ForegroundColor = DescColor;
+
+            Console.ForegroundColor = ClrDesc;
             Console.WriteLine(desc);
+
             Console.ResetColor();
         }
 
         private void PrintSection(string title)
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine(title);
+            Console.ForegroundColor = ClrSuccess;
+            Console.WriteLine(" " + title);
             Console.ResetColor();
         }
 
-        private void DrawHeader(string title)
+        private void DrawHeader(string text)
         {
-            Console.ForegroundColor = BorderColor;
-            Console.WriteLine(new string('=', 50));
-            Console.ForegroundColor = HeaderColor;
-            int spaces = (50 - title.Length) / 2;
-            Console.WriteLine(new string(' ', spaces) + title);
-            Console.ForegroundColor = BorderColor;
-            Console.WriteLine(new string('=', 50));
+            int totalWidth = Console.WindowWidth;
+            int textLen = text.Length;
+            int dashLen = (totalWidth - textLen) / 2;
+            if (dashLen < 0) dashLen = 0;
+
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write(new string('-', dashLen));
+
+            Console.ForegroundColor = ClrBorder;
+            Console.Write(text);
+
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine(new string('-', dashLen));
             Console.ResetColor();
         }
 
-        private void DrawFooter()
+        private void CenterText(string text, ConsoleColor color)
         {
-            Console.ForegroundColor = BorderColor;
-            Console.WriteLine(new string('-', 50));
+            int x = (Console.WindowWidth - text.Length) / 2;
+            if (x < 0) x = 0;
+            Console.SetCursorPosition(x, Console.CursorTop);
+            Console.ForegroundColor = color;
+            Console.WriteLine(text);
             Console.ResetColor();
         }
 
@@ -217,8 +258,7 @@ namespace EQUINOX.Features
             {
                 TicTacToe game = new TicTacToe();
                 game.Run();
-                Console.Clear();
-                DrawLogo(); // Redraw logo when coming back
+                DrawLogo(); // Reset screen to logo on exit
             }
             catch (Exception e)
             {
@@ -239,8 +279,7 @@ namespace EQUINOX.Features
                 // Disable graphics to return to text mode
                 canvas.Disable();
 
-                Console.Clear();
-                DrawLogo(); // Redraw logo when coming back
+                DrawLogo(); // Reset screen to logo on exit
             }
             catch (Exception e)
             {
