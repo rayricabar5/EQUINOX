@@ -159,6 +159,9 @@ namespace EQUINOX
                     case "wordle":
                         general.LaunchWordle();
                         break;
+                    case "typerace":
+                        general.LaunchTyperace();
+                        break;
                     case "tictactoe":
                         general.LaunchTicTacToe();
                         break;

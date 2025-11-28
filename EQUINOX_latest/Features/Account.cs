@@ -193,33 +193,57 @@ namespace EQUINOX.Features
             return false;
         }
 
-        // --- HELPER: Secure Password Input ---
+        // --- HELPER: Secure Password Input (Cosmos-friendly) ---
         private string ReadPassword()
         {
-            string pass = "";
+            var sb = new StringBuilder();
+
             while (true)
             {
-                ConsoleKeyInfo key = Console.ReadKey(true); // 'true' intercepts the key
-
-                if (key.Key == ConsoleKey.Enter)
+                if (!Cosmos.System.KeyboardManager.TryReadKey(out var keyInfo))
                 {
+                    // No key available; yield briefly
+                    continue;
+                }
+
+                // Enter finalizes input
+                if (keyInfo.Key == ConsoleKeyEx.Enter)
+                {
+                    Console.WriteLine();
                     break;
                 }
-                else if (key.Key == ConsoleKey.Backspace)
+
+                // Backspace handling
+                if (keyInfo.Key == ConsoleKeyEx.Backspace)
                 {
-                    if (pass.Length > 0)
+                    if (sb.Length > 0)
                     {
-                        pass = pass.Substring(0, pass.Length - 1);
-                        Console.Write("\b \b"); // Visually delete character
+                        sb.Remove(sb.Length - 1, 1);
+
+                        int curLeft = Console.CursorLeft;
+                        if (curLeft > 0)
+                        {
+                            Console.SetCursorPosition(curLeft - 1, Console.CursorTop);
+                            Console.Write(' ');
+                            Console.SetCursorPosition(curLeft - 1, Console.CursorTop);
+                        }
                     }
+                    // If buffer empty, do nothing
+                    continue;
                 }
-                else if (!char.IsControl(key.KeyChar))
+
+                // Ignore other control keys
+                if (char.IsControl(keyInfo.KeyChar))
                 {
-                    pass += key.KeyChar;
-                    Console.Write("*"); // Print asterisk instead
+                    continue;
                 }
+
+                // Normal character
+                sb.Append(keyInfo.KeyChar);
+                Console.Write('*');
             }
-            return pass;
+
+            return sb.ToString();
         }
 
         // --- VISUAL HELPERS ---

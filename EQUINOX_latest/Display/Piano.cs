@@ -18,7 +18,7 @@ namespace EQUINOX.Display
         private Cancel cancel;
         private Music key;
 
-        // --- THEME COLORS ---
+        // THEME COLORS
         private Color colBackground = Color.FromArgb(30, 30, 30);
         private Color colKeyWhite = Color.White;
         private Color colKeyShadow = Color.Silver;

@@ -13,11 +13,11 @@ namespace EQUINOX.Features
         private int screenWidth;
         private int screenHeight;
 
-        // --- Game Constants ---
+        // Game const var
         private const int MAX_ATTEMPTS = 6;
         private const int WORD_LENGTH = 5;
 
-        // --- Layout Variables ---
+        // layout var
         private int boxSize = 50;
         private int gap = 8;
         private int keyWidth = 30;
@@ -26,7 +26,7 @@ namespace EQUINOX.Features
         private int startY_Grid = 80;
         private int startY_Keyboard = 0;
 
-        // --- Game State ---
+        // game state
         private string targetWord;
         private List<string> guesses;
         private string currentGuess;
@@ -34,15 +34,14 @@ namespace EQUINOX.Features
         private string message;
         private Dictionary<char, int> keyStates; // 0: Unused, 1: Absent, 2: Present, 3: Correct
 
-        // --- Theme Colors (Dark Mode Style) ---
-        // Using Color.FromArgb for specific "Wordle" aesthetics
-        private readonly Color Col_Background = Color.FromArgb(18, 18, 19);    // Dark Hex #121213
-        private readonly Color Col_Correct = Color.FromArgb(83, 141, 78);   // Green Hex #538D4E
-        private readonly Color Col_Present = Color.FromArgb(181, 159, 59);  // Yellow Hex #B59F3B
-        private readonly Color Col_Absent = Color.FromArgb(58, 58, 60);    // Dark Gray Hex #3A3A3C
+        // theme (dark)
+        private readonly Color Col_Background = Color.FromArgb(18, 18, 19);    // Dark Hex
+        private readonly Color Col_Correct = Color.FromArgb(83, 141, 78);   // Green Hex
+        private readonly Color Col_Present = Color.FromArgb(181, 159, 59);  // Yellow Hex
+        private readonly Color Col_Absent = Color.FromArgb(58, 58, 60);    // Dark Gray
         private readonly Color Col_Border = Color.FromArgb(58, 58, 60);    // Border Gray
         private readonly Color Col_Text = Color.White;
-        private readonly Color Col_KeyDefault = Color.FromArgb(129, 131, 132); // Light Gray for keys
+        private readonly Color Col_KeyDefault = Color.FromArgb(129, 131, 132); // Light Gray
 
         // Pens
         private Pen penCorrect;
@@ -74,7 +73,7 @@ namespace EQUINOX.Features
             this.screenHeight = (int)canvas.Mode.Rows;
             this.keyStates = new Dictionary<char, int>();
 
-            // Initialize Pens once
+            // Initialize Pens
             penCorrect = new Pen(Col_Correct);
             penPresent = new Pen(Col_Present);
             penAbsent = new Pen(Col_Absent);
@@ -88,25 +87,25 @@ namespace EQUINOX.Features
 
         private void CalculateLayout()
         {
-            // Dynamic resizing based on screen resolution
+            // Dynamic resizing
             int totalAvailableHeight = screenHeight - 100; // Reserve header space
             int gridTotalHeight = (int)(totalAvailableHeight * 0.55);
 
             boxSize = (gridTotalHeight / MAX_ATTEMPTS) - gap;
 
-            // Clamp box size for sanity
+            // Clamp box size
             if (boxSize > 70) boxSize = 70;
             if (boxSize < 30) boxSize = 30;
 
-            int maxKeyRowWidth = (int)(screenWidth * 0.6); // Keyboard takes 60% width
+            int maxKeyRowWidth = (int)(screenWidth * 0.6);
             keyWidth = (maxKeyRowWidth / 10) - keyGap;
 
             if (keyWidth > 40) keyWidth = 40;
-            keyHeight = (int)(keyWidth * 1.4); // Aspect ratio for keys
+            keyHeight = (int)(keyWidth * 1.4); // Aspect ratio
 
             startY_Grid = 70;
             int gridHeightPixels = (MAX_ATTEMPTS * (boxSize + gap));
-            startY_Keyboard = startY_Grid + gridHeightPixels + 40; // Space between grid and keyboard
+            startY_Keyboard = startY_Grid + gridHeightPixels + 40; // Space
         }
 
         public void Run()
@@ -209,7 +208,7 @@ namespace EQUINOX.Features
                     status = 2; // Present
                 }
 
-                // Only upgrade status (don't downgrade a Green key to Yellow)
+                // Only upgrade status
                 if (keyStates[c] < status)
                 {
                     keyStates[c] = status;
@@ -234,18 +233,18 @@ namespace EQUINOX.Features
 
         private void Draw()
         {
-            // 1. Clear Background
+            // Clear Background
             canvas.Clear(Col_Background);
 
-            // 2. Draw Header
+            // Draw Header
             int centerX = screenWidth / 2;
             int gridTotalWidth = (boxSize + gap) * WORD_LENGTH;
             int startX = (screenWidth - gridTotalWidth) / 2;
 
-            DrawCenteredText("EQUINOX WORDLE", 20, Col_Text, 2); // Larger faux-bold
+            DrawCenteredText("EQUINOX WORDLE", 20, Col_Text, 2); //Larger faux-bold
             DrawCenteredText(message, 50, Color.LightGray, 1);
 
-            // 3. Draw Grid
+            // Draw Grid
             for (int row = 0; row < MAX_ATTEMPTS; row++)
             {
                 for (int col = 0; col < WORD_LENGTH; col++)
@@ -261,7 +260,6 @@ namespace EQUINOX.Features
                     // Logic for colored boxes
                     if (row < guesses.Count)
                     {
-                        // Completed rows
                         string g = guesses[row];
                         letter = g[col].ToString();
 
@@ -283,7 +281,6 @@ namespace EQUINOX.Features
                     }
                     else if (row == guesses.Count)
                     {
-                        // Current typing row
                         if (col < currentGuess.Length)
                         {
                             letter = currentGuess[col].ToString();
@@ -314,7 +311,7 @@ namespace EQUINOX.Features
                 }
             }
 
-            // 4. Draw Keyboard
+            // Draw Keyboard
             DrawKeyboard(startY_Keyboard);
 
             canvas.Display();
@@ -328,7 +325,6 @@ namespace EQUINOX.Features
             {
                 string rowKeys = keyRows[r];
 
-                // Calculate center alignment for this specific row
                 int rowWidth = (rowKeys.Length * keyWidth) + ((rowKeys.Length - 1) * keyGap);
                 kStartX = (screenWidth - rowWidth) / 2;
 
@@ -362,10 +358,9 @@ namespace EQUINOX.Features
             }
         }
 
-        // Helper to center text easily
+        // Helper for test display
         private void DrawCenteredText(string text, int y, Color color, int scale = 1)
         {
-            // Note: PCScreenFont is usually 8px wide per char
             int strWidth = text.Length * 8;
             int x = (screenWidth - strWidth) / 2;
 
