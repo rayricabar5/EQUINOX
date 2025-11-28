@@ -7,9 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using Console = System.Console;
 using Sys = Cosmos.System;
 
@@ -20,223 +17,247 @@ namespace EQUINOX.Display
         private Canvas canvas;
         private Cancel cancel;
         private Music key;
-        private Color bg = Color.Brown;
+
+        // --- THEME COLORS ---
+        private Color colBackground = Color.FromArgb(30, 30, 30);
+        private Color colKeyWhite = Color.White;
+        private Color colKeyShadow = Color.Silver;
+        private Color colKeyBorder = Color.Black;
+        private Color colText = Color.Black;
+        private Color colAccent = Color.Cyan;
 
         private MouseState prevMouseState;
         private List<Tuple<Sys.Graphics.Point, Color>> savedPixels;
         private UInt32 px, py;
+        private Pen penCursor;
+        private bool close = false;
 
-        private Pen pen;
-        private Pen gray = new Pen(Color.Gray);
-        private Pen black = new Pen(Color.Black);
-        private Pen white = new Pen(Color.White);
+        // Key Configuration
+        private int startX;
+        private int startY;
+        private int keyW = 75;
+        private int keyH = 350;
 
-        bool close = false;
+        // Key Labels
+        private string[] keyLabels = { "A3", "B3", "C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5" };
 
         public Piano()
         {
             this.canvas = FullScreenCanvas.GetFullScreenCanvas();
-            this.canvas.Clear(bg);
             this.cancel = new Cancel(canvas);
-
-            this.pen = new Pen(Color.White);
-            this.prevMouseState = MouseState.None;
-
-            this.px = 5;
-            this.py = 5;
-            this.savedPixels = new List<Tuple<Sys.Graphics.Point, Color>>();
-
-            this.cancel = new Cancel(this.canvas);
             this.key = new Music();
-
-            var font = PCScreenFont.Default;
+            this.penCursor = new Pen(Color.Cyan);
+            this.savedPixels = new List<Tuple<Sys.Graphics.Point, Color>>();
 
             MouseManager.ScreenHeight = (UInt32)this.canvas.Mode.Rows;
             MouseManager.ScreenWidth = (UInt32)this.canvas.Mode.Columns;
 
-            int startX = 275;
-            int y = 100;
-            int keyW = 75;
-            int keyH = 375;
+            // --- CALCULATE CENTERING ---
+            int totalWidth = keyLabels.Length * keyW;
+            this.startX = ((int)this.canvas.Mode.Columns - totalWidth) / 2;
+            this.startY = ((int)this.canvas.Mode.Rows - keyH) / 2;
 
-            // A3
-            this.canvas.DrawFilledRectangle(gray, startX - keyW * 2, y, keyW, keyH);
-            this.canvas.DrawRectangle(black, startX - keyW * 2, y, keyW, keyH);
-            this.canvas.DrawString("A3", font, this.white, (startX - keyW * 2) + (keyW / 2) - 2, y + keyH + 15);
+            // Initial Draw
+            DrawInterface();
+        }
 
-            // B3
-            this.canvas.DrawFilledRectangle(gray, startX - keyW, y, keyW, keyH);
-            this.canvas.DrawRectangle(black, startX - keyW, y, keyW, keyH);
-            this.canvas.DrawString("B3", font, this.white, (startX - keyW) + (keyW / 2) - 2, y + keyH + 15);
+        private void DrawInterface()
+        {
+            this.canvas.Clear(colBackground);
 
-            // C
-            this.canvas.DrawFilledRectangle(gray, startX, y, keyW, keyH);
-            this.canvas.DrawRectangle(black, startX, y, keyW, keyH);
-            this.canvas.DrawString("C4", font, this.white, startX + (keyW / 2) - 2, y + keyH + 15);
+            // Header Line
+            this.canvas.DrawFilledRectangle(new Pen(colAccent), 0, 40, (int)this.canvas.Mode.Columns, 5);
+            this.canvas.DrawString("IndieOS Synth", PCScreenFont.Default, new Pen(Color.White), 25, 15);
 
-            // D
-            this.canvas.DrawFilledRectangle(gray, startX + keyW, y, keyW, keyH);
-            this.canvas.DrawRectangle(black, startX + keyW, y, keyW, keyH);
-            this.canvas.DrawString("D4", font, this.white, (startX + keyW) + (keyW / 2) - 2, y + keyH + 15);
+            // Draw Keys
+            for (int i = 0; i < keyLabels.Length; i++)
+            {
+                DrawKey(i, keyLabels[i]);
+            }
 
-            // E
-            this.canvas.DrawFilledRectangle(gray, startX + keyW * 2, y, keyW, keyH);
-            this.canvas.DrawRectangle(black, startX + keyW * 2, y, keyW, keyH);
-            this.canvas.DrawString("E4", font, this.white, (startX + keyW * 2) + (keyW / 2) - 2, y + keyH + 15);
+            // Instructions
+            string instructions = "[ Mouse Click ] or [ Keys A-L + P ] to Play  |  [ ESC ] to Exit";
+            int instrX = ((int)this.canvas.Mode.Columns - (instructions.Length * 8)) / 2;
+            this.canvas.DrawString(instructions, PCScreenFont.Default, new Pen(Color.Gray), instrX, (int)this.canvas.Mode.Rows - 30);
+        }
 
-            // F
-            this.canvas.DrawFilledRectangle(gray, startX + keyW * 3, y, keyW, keyH);
-            this.canvas.DrawRectangle(black, startX + keyW * 3, y, keyW, keyH);
-            this.canvas.DrawString("F4", font, this.white, (startX + keyW * 3) + (keyW / 2) - 2, y + keyH + 15);
+        private void DrawKey(int index, string label)
+        {
+            int x = startX + (index * keyW);
 
-            // G
-            this.canvas.DrawFilledRectangle(gray, startX + keyW * 4, y, keyW, keyH);
-            this.canvas.DrawRectangle(black, startX + keyW * 4, y, keyW, keyH);
-            this.canvas.DrawString("G4", font, this.white, (startX + keyW * 4) + (keyW / 2) - 2, y + keyH + 15);
+            this.canvas.DrawFilledRectangle(new Pen(colKeyWhite), x, startY, keyW, keyH);
+            this.canvas.DrawFilledRectangle(new Pen(colKeyShadow), x, startY + keyH - 30, keyW, 30);
+            this.canvas.DrawRectangle(new Pen(colKeyBorder), x, startY, keyW, keyH);
 
-            // A
-            this.canvas.DrawFilledRectangle(gray, startX + keyW * 5, y, keyW, keyH);
-            this.canvas.DrawRectangle(black, startX + keyW * 5, y, keyW, keyH);
-            this.canvas.DrawString("A4", font, this.white, (startX + keyW * 5) + (keyW / 2) - 2, y + keyH + 15);
-
-            // B
-            this.canvas.DrawFilledRectangle(gray, startX + keyW * 6, y, keyW, keyH);
-            this.canvas.DrawRectangle(black, startX + keyW * 6, y, keyW, keyH);
-            this.canvas.DrawString("B4", font, this.white, (startX + keyW * 6) + (keyW / 2) - 2, y + keyH + 15);
-
-            // C5
-            this.canvas.DrawFilledRectangle(gray, startX + keyW * 7, y, keyW, keyH);
-            this.canvas.DrawRectangle(black, startX + keyW * 7, y, keyW, keyH);
-            this.canvas.DrawString("C5", font, this.white, (startX + keyW * 7) + (keyW / 2) - 2, y + keyH + 15);
+            int textX = x + (keyW / 2) - ((label.Length * 8) / 2);
+            int textY = startY + keyH - 20;
+            this.canvas.DrawString(label, PCScreenFont.Default, new Pen(colText), textX, textY);
         }
 
         public void HandleGUIinputs()
         {
-            if (this.px != MouseManager.X && this.py != MouseManager.Y)
+            bool actionTaken = false;
+
+            // --- KEYBOARD INPUT ---
+            KeyEvent k;
+            if (KeyboardManager.TryReadKey(out k))
             {
-            // This code moves mouse pointer based on compared prev and current positions
-
-                //Avoid out of bounds
-                if (MouseManager.X <= 2 || MouseManager.Y <= 2 || MouseManager.X >= 1000 || MouseManager.Y >= 750)
+                if (k.Key == ConsoleKeyEx.Escape)
+                {
+                    ExitPiano();
                     return;
-
-                this.px = MouseManager.X;
-                this.py = MouseManager.Y;
-
-                Sys.Graphics.Point[] points = new Sys.Graphics.Point[]
-                {
-                    new Sys.Graphics.Point((Int32) MouseManager.X, (Int32)MouseManager.Y),
-                    new Sys.Graphics.Point((Int32) MouseManager.X, (Int32)MouseManager.Y-1),
-                    new Sys.Graphics.Point((Int32) MouseManager.X, (Int32)MouseManager.Y-2),
-                    new Sys.Graphics.Point((Int32) MouseManager.X, (Int32)MouseManager.Y-3),
-                    new Sys.Graphics.Point((Int32) MouseManager.X, (Int32)MouseManager.Y-4),
-
-                    new Sys.Graphics.Point((Int32) MouseManager.X+1, (Int32)MouseManager.Y-1),
-                    new Sys.Graphics.Point((Int32) MouseManager.X+2, (Int32)MouseManager.Y-2),
-                    new Sys.Graphics.Point((Int32) MouseManager.X+3, (Int32)MouseManager.Y-3),
-                    new Sys.Graphics.Point((Int32) MouseManager.X+4, (Int32)MouseManager.Y-4),
-
-                    new Sys.Graphics.Point((Int32) MouseManager.X+1, (Int32)MouseManager.Y-4),
-                    new Sys.Graphics.Point((Int32) MouseManager.X+2, (Int32)MouseManager.Y-4),
-                    new Sys.Graphics.Point((Int32) MouseManager.X+3, (Int32)MouseManager.Y-4),
-                };
-
-                foreach (Tuple<Sys.Graphics.Point, Color> pixelData in this.savedPixels)
-                {
-                    this.canvas.DrawPoint(new Pen(pixelData.Item2), pixelData.Item1);
                 }
 
-                this.savedPixels.Clear();
-
-                foreach (Sys.Graphics.Point p in points)
+                int noteIndex = -1;
+                switch (k.Key)
                 {
-                    this.savedPixels.Add(new Tuple<Sys.Graphics.Point, Color>(p, this.canvas.GetPointColor(p.X, p.Y)));
-                    this.canvas.DrawPoint(this.pen, p);
+                    case ConsoleKeyEx.A: noteIndex = 0; break;
+                    case ConsoleKeyEx.S: noteIndex = 1; break;
+                    case ConsoleKeyEx.D: noteIndex = 2; break;
+                    case ConsoleKeyEx.F: noteIndex = 3; break;
+                    case ConsoleKeyEx.G: noteIndex = 4; break;
+                    case ConsoleKeyEx.H: noteIndex = 5; break;
+                    case ConsoleKeyEx.J: noteIndex = 6; break;
+                    case ConsoleKeyEx.K: noteIndex = 7; break;
+                    case ConsoleKeyEx.L: noteIndex = 8; break;
+                    case ConsoleKeyEx.P: noteIndex = 9; break;
                 }
 
-
+                if (noteIndex != -1)
+                {
+                    TriggerNote(noteIndex);
+                    actionTaken = true;
+                }
             }
 
+            // --- MOUSE CURSOR ---
+            if (this.px != MouseManager.X && this.py != MouseManager.Y)
+            {
+                if (MouseManager.X > 2 && MouseManager.Y > 2 && MouseManager.X < canvas.Mode.Columns - 2 && MouseManager.Y < canvas.Mode.Rows - 2)
+                {
+                    this.px = MouseManager.X;
+                    this.py = MouseManager.Y;
+
+                    foreach (Tuple<Sys.Graphics.Point, Color> pixelData in this.savedPixels)
+                        this.canvas.DrawPoint(new Pen(pixelData.Item2), pixelData.Item1);
+                    this.savedPixels.Clear();
+
+                    Sys.Graphics.Point[] points = new Sys.Graphics.Point[]
+                    {
+                        new Sys.Graphics.Point((Int32)MouseManager.X, (Int32)MouseManager.Y),
+                        new Sys.Graphics.Point((Int32)MouseManager.X - 1, (Int32)MouseManager.Y),
+                        new Sys.Graphics.Point((Int32)MouseManager.X + 1, (Int32)MouseManager.Y),
+                        new Sys.Graphics.Point((Int32)MouseManager.X, (Int32)MouseManager.Y - 1),
+                        new Sys.Graphics.Point((Int32)MouseManager.X, (Int32)MouseManager.Y + 1)
+                    };
+
+                    foreach (Sys.Graphics.Point p in points)
+                    {
+                        if (p.X >= 0 && p.X < canvas.Mode.Columns && p.Y >= 0 && p.Y < canvas.Mode.Rows)
+                        {
+                            this.savedPixels.Add(new Tuple<Sys.Graphics.Point, Color>(p, this.canvas.GetPointColor(p.X, p.Y)));
+                            this.canvas.DrawPoint(this.penCursor, p);
+                        }
+                    }
+                    actionTaken = true;
+                }
+            }
+
+            // --- MOUSE CLICK ---
             if (MouseManager.MouseState == MouseState.Left && this.prevMouseState != MouseState.Left)
             {
                 close = this.cancel.tryCancelClick((Int32)MouseManager.X, (Int32)MouseManager.Y);
-
                 if (close)
                 {
-                    // 1. Disable graphics canvas
-                    this.canvas.Disable();
-
-                    // 3. Clear the screen
-                    Console.Clear();
-
-                    // 4. Drain any pending keyboard input
-                    while (Cosmos.System.KeyboardManager.TryReadKey(out var _)) { }
-
-                    // 5. Reset GUI reference in Kernel
-                    Kernel.piano = null;
-
-                    // 6. Show CLI prompt again
-                    Console.WriteLine("Exited GUI.");
-                    Console.Write("> ");
-
+                    ExitPiano();
                     return;
                 }
 
-                this.tryKeyClick((Int32)MouseManager.X, (Int32)MouseManager.Y);
+                this.tryMouseClick((Int32)MouseManager.X, (Int32)MouseManager.Y);
+                actionTaken = true;
             }
+
+            this.prevMouseState = MouseManager.MouseState;
+
+            if (actionTaken) this.canvas.Display();
+        }
+
+        private void TriggerNote(int index)
+        {
+            HighlightKey(index);
+            this.canvas.Display();
+            PlayNoteByIndex(index);
+            DrawKey(index, keyLabels[index]);
             this.canvas.Display();
         }
 
-        public void tryKeyClick(Int32 mouseX, Int32 mouseY)
+        private void ExitPiano()
         {
-            Rectangle p = new Rectangle(mouseX, mouseY, 1, 1);
+            this.canvas.Disable();
+            Console.Clear();
+            while (Cosmos.System.KeyboardManager.TryReadKey(out var _)) { }
 
-            int startX = 275;
-            int y = 100;
-            int keyW = 75;
-            int keyH = 375;
+            // Reset Global Reference
+            Kernel.piano = null;
 
-                // A3
-                if (p.IntersectsWith(new Rectangle(startX - keyW * 2, y, keyW, keyH)))
-                    key.LaLow();
-
-                // B3
-                if (p.IntersectsWith(new Rectangle(startX - keyW, y, keyW, keyH)))
-                    key.TiLow();
-
-                // C4
-                if (p.IntersectsWith(new Rectangle(startX, y, keyW, keyH)))
-                    key.Do();
-
-                // D4
-                if (p.IntersectsWith(new Rectangle(startX + keyW, y, keyW, keyH)))
-                    key.Re();
-
-                // E4
-                if (p.IntersectsWith(new Rectangle(startX + keyW * 2, y, keyW, keyH)))
-                    key.Mi();
-
-                // F4
-                if (p.IntersectsWith(new Rectangle(startX + keyW * 3, y, keyW, keyH)))
-                    key.Fa();
-
-                // G4
-                if (p.IntersectsWith(new Rectangle(startX + keyW * 4, y, keyW, keyH)))
-                    key.So();
-
-                // A4
-                if (p.IntersectsWith(new Rectangle(startX + keyW * 5, y, keyW, keyH)))
-                    key.La();
-
-                // B4
-                if (p.IntersectsWith(new Rectangle(startX + keyW * 6, y, keyW, keyH)))
-                    key.Ti();
-
-                // C5
-                if (p.IntersectsWith(new Rectangle(startX + keyW * 7, y, keyW, keyH)))
-                    key.DoHigh();
+            // DRAW THE LOGO ON EXIT
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine(@"
+  _____           _  _        ____   _____ 
+ |_   _|         | |(_)      / __ \ / ____|
+   | |  _ __   __| | _  ___ | |  | | (___  
+   | | | '_ \ / _` || |/ _ \| |  | |\___ \ 
+  _| |_| | | | (_| || |  __/| |__| |____) |
+ |_____|_| |_|\__,_||_|\___| \____/|_____/ 
+            ");
+            Console.ResetColor();
+            Console.WriteLine("\n       Welcome to IndieOS v1.0");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine("       Type 'help' for commands.");
+            Console.ResetColor();
+            Console.WriteLine();
+            Console.Write("IndieOS> ");
         }
 
+        public void tryMouseClick(Int32 mouseX, Int32 mouseY)
+        {
+            if (mouseY >= startY && mouseY <= startY + keyH)
+            {
+                if (mouseX >= startX)
+                {
+                    int relativeX = mouseX - startX;
+                    int keyIndex = relativeX / keyW;
 
+                    if (keyIndex >= 0 && keyIndex < keyLabels.Length)
+                    {
+                        TriggerNote(keyIndex);
+                    }
+                }
+            }
+        }
+
+        private void HighlightKey(int index)
+        {
+            int x = startX + (index * keyW);
+            this.canvas.DrawFilledRectangle(new Pen(Color.Cyan), x + 5, startY + 5, keyW - 10, keyH - 40);
+        }
+
+        private void PlayNoteByIndex(int index)
+        {
+            switch (index)
+            {
+                case 0: key.LaLow(); break;
+                case 1: key.TiLow(); break;
+                case 2: key.Do(); break;
+                case 3: key.Re(); break;
+                case 4: key.Mi(); break;
+                case 5: key.Fa(); break;
+                case 6: key.So(); break;
+                case 7: key.La(); break;
+                case 8: key.Ti(); break;
+                case 9: key.DoHigh(); break;
+            }
+        }
     }
 }

@@ -1,18 +1,5 @@
-﻿using Cosmos.System;
-using Cosmos.System.FileSystem;
-using Cosmos.System.FileSystem.VFS;
-using Cosmos.System.Graphics;
-using Cosmos.System.Graphics.Fonts;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
+﻿using System;
 using Console = System.Console;
-using Sys = Cosmos.System;
-using EQUINOX.Display;
 
 namespace EQUINOX.Features
 {
@@ -20,10 +7,10 @@ namespace EQUINOX.Features
     {
         public float Calculate(string[] args)
         {
+            // Visual Improvement: Clean Usage Guide
             if (args.Length < 2)
             {
-                Console.WriteLine("Usage: calc <operation> <num1> <num2> ...");
-                Console.WriteLine("Operations: -a (add), -s (subtract), -m (multiply), -d (divide)");
+                PrintUsage();
                 return 0;
             }
 
@@ -31,32 +18,33 @@ namespace EQUINOX.Features
             string operation = args[0];
             float answer;
 
+            // Parse numbers with visual error handling
             for (int i = 0; i < args.Length - 1; i++)
             {
                 try
                 {
                     numbers[i] = float.Parse(args[i + 1]);
                 }
-                catch (Exception err)
+                catch
                 {
-                    Console.WriteLine(err.Message);
-                    Console.WriteLine("One of the input is unable to be added");
-                    Console.WriteLine($"Invalid number: {args[i + 1]}");
+                    PrintError($"Invalid number format: '{args[i + 1]}'");
                     return 0;
                 }
             }
 
             answer = numbers[0];
 
+            // Validation for single number input
             if (numbers.Length == 1)
             {
-                if (operation != "-a" && operation != "-s" && operation != "-m" && operation != "-d")
+                if (!isValidOp(operation))
                 {
-                    Console.WriteLine($"Operation {operation} is not recognized.");
+                    PrintError($"Unknown operation: '{operation}'");
                     return 0;
                 }
             }
 
+            // Calculation Loop
             for (int i = 1; i < numbers.Length; i++)
             {
                 switch (operation)
@@ -73,19 +61,56 @@ namespace EQUINOX.Features
                     case "-d":
                         if (numbers[i] == 0)
                         {
-                            Console.WriteLine("Error: Division by zero.");
+                            PrintError("Cannot divide by zero.");
                             return 0;
                         }
                         answer /= numbers[i];
                         break;
                     default:
-                        Console.WriteLine($"Operation {operation} is not recognized.");
+                        PrintError($"Unknown operation: '{operation}'");
                         return 0;
                 }
             }
 
-            Console.WriteLine(answer);
+            // Print Final Result nicely
+            PrintResult(answer);
             return answer;
+        }
+
+        // --- Helper Methods for Clean Code ---
+
+        private bool isValidOp(string op)
+        {
+            return op == "-a" || op == "-s" || op == "-m" || op == "-d";
+        }
+
+        private void PrintUsage()
+        {
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.Write("  [?] Usage: ");
+            Console.ResetColor();
+            Console.WriteLine("calc <operation> <number1> <number2> ...");
+
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine("      Operations: -a (add) | -s (sub) | -m (mul) | -d (div)");
+            Console.ResetColor();
+        }
+
+        private void PrintError(string msg)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write("  [!] Error: ");
+            Console.ResetColor();
+            Console.WriteLine(msg);
+        }
+
+        private void PrintResult(float result)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("  [=] Result: ");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine(result);
+            Console.ResetColor();
         }
     }
 }
