@@ -29,7 +29,7 @@ namespace EQUINOX.Features
         private const string PrefFile = @"0:\preferences.txt";
         public void SavePreference(string theme)
         {
-            // 1. Ensure drive exists
+            // Ensure drive exists
             if (!Directory.Exists(@"0:\"))
             {
                 return;
@@ -48,13 +48,23 @@ namespace EQUINOX.Features
 
         public string ReadPref()
         {
+            // Ensure drive exists
+            if (!Directory.Exists(@"0:\"))
+            {
+                return "";
+            }
+            if (!File.Exists(PrefFile))
+            {
+                return "";
+            }
+
             string fileContent = File.ReadAllText(PrefFile);
             return fileContent;
         }
 
         public void PrefInit()
         {
-            // 1. Ensure drive exists
+            // Ensure drive exists
             if (!Directory.Exists(@"0:\"))
             {
                 return;
@@ -62,8 +72,8 @@ namespace EQUINOX.Features
 
             if (!File.Exists(PrefFile))
             {
-                Console.WriteLine("No account database found. Creating a new one...");
-                File.WriteAllText(PrefFile, "");   // avoid IL2CPU zero-byte bug
+                Console.WriteLine("No User Preferences database found. Creating a new one...");
+                File.WriteAllText(PrefFile, "");
             }
             
             return;

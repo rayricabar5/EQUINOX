@@ -38,21 +38,21 @@ namespace EQUINOX.Features
 
         public bool CreateAccount()
         {
-            // 1. Ensure drive exists
+            // Ensure drive exists
             if (!Directory.Exists(@"0:\"))
             {
                 PrintWarning("Volume 0:\\ not found. Persistence disabled.");
                 return true; // Bypass login if no drive
             }
 
-            // 2. If no users file -> Setup Mode
+            // If no users file -> Setup Mode
             if (!File.Exists(UserDbPath))
             {
                 File.WriteAllText(UserDbPath, ""); // Avoid IL2CPU zero-byte bug
                 return RegisterNewUser();
             }
 
-            // 3. Normal Login Mode
+            // Normal Login Mode
             return LoginUser();
         }
 

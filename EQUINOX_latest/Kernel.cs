@@ -34,18 +34,17 @@ namespace EQUINOX
 
         protected override void BeforeRun()
         {
-            // 1. Initialize File System
+            // Initialize File System
             _vfs = new CosmosVFS();
             VFSManager.RegisterVFS(_vfs);
 
-            // 2. Initialize General Functions (CRITICAL for Boot Animation)
+            // Initialize General Functions
             general = new GeneralFunc();
 
-            // 3. Play Boot Animation
+            // Play Boot Animation
             general.BootAnimation();
 
-            // 4. Initialize other systems
-            // (Uncommented to prevent crashes when using calc/canvas)
+            // Initialize other systems
             launcher = new LaunchGUI();
             calculator = new Calculator();
             account = new AccountSystem();
@@ -56,7 +55,7 @@ namespace EQUINOX
 
             try
             {
-                // Ensure 'voice' is initialized before calling methods on it
+                // Ensure 'voice' is initialized
                 if (voice != null)
                 {
                     voice.VoiceOver();
@@ -316,6 +315,13 @@ namespace EQUINOX
                     case "user":
                         if (account != null) account.ViewUsers();
                         else PrintSystemWarning("Account system not initialized.");
+                        break;
+                    case "version":
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.WriteLine("  ");
+                        Console.WriteLine("IndieOS Version 1.0.0");
+                        Console.WriteLine("  ");
+                        Console.ResetColor();
                         break;
                     default:
                         Console.ForegroundColor = ConsoleColor.Red;
