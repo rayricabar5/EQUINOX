@@ -148,6 +148,7 @@ namespace EQUINOX.Features
             PrintItem("tictactoe", "Play Tic-Tac-Toe");
             PrintItem("calc", "Calculator tool");
             PrintItem("piano", "Play Piano Synth");
+            PrintItem("typerace", "Play Type Racing");
             PrintItem("canvas", "Enter drawing mode");
 
             Console.WriteLine();
@@ -231,6 +232,28 @@ namespace EQUINOX.Features
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine(new string('-', dashLen));
             Console.ResetColor();
+        }
+
+        public void LaunchTyperace()
+        {
+            Console.WriteLine("Initializing Typerace (Graphics Mode)...");
+            try
+            {
+                Canvas canvas = FullScreenCanvas.GetFullScreenCanvas(new Mode(800, 600, ColorDepth.ColorDepth32));
+                canvas.Clear(Color.Black);
+                Typeracing game = new Typeracing(canvas);
+                game.Run();
+                canvas.Disable();
+                Console.Clear();
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Returned to Text Mode.");
+                Console.ForegroundColor = ConsoleColor.White;
+                Help();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error launching Typerace: " + e.Message);
+            }
         }
 
         private void CenterText(string text, ConsoleColor color)
